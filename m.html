@@ -1,0 +1,983 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Myanmar 2D Live | Future Vision</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        :root {
+            --neon-cyan: #00f3ff;
+            --neon-purple: #b967ff;
+            --neon-pink: #ff00ff;
+            --neon-green: #00ff9d;
+            --dark-space: #0a0e17;
+            --deep-space: #151a2d;
+            --cyber-gray: #1a1f35;
+            --hologram-blue: rgba(0, 195, 255, 0.1);
+        }
+
+        body {
+            background-color: var(--dark-space);
+            color: #e0e0ff;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(11, 20, 50, 0.8) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(70, 0, 100, 0.6) 0%, transparent 40%),
+                linear-gradient(to bottom, var(--dark-space), var(--deep-space));
+            position: relative;
+        }
+
+        .grid-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(rgba(0, 243, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 243, 255, 0.03) 1px, transparent 1px);
+            background-size: 40px 40px;
+            z-index: -1;
+            opacity: 0.5;
+        }
+
+        .holographic-glow {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            z-index: -1;
+            background: 
+                radial-gradient(circle at 20% 30%, rgba(0, 243, 255, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 80% 70%, rgba(185, 103, 255, 0.15) 0%, transparent 50%);
+            filter: blur(60px);
+            opacity: 0.6;
+        }
+
+        .app-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            padding: 10px;
+            padding-bottom: 15px;
+            max-width: 500px;
+            margin: 0 auto;
+            overflow: hidden;
+        }
+
+        .header {
+            width: 100%;
+            margin-bottom: 15px;
+            padding-top: 5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .app-title {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            text-align: left;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 18px;
+            font-weight: 800;
+            background: linear-gradient(90deg, var(--neon-cyan), var(--neon-purple));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            letter-spacing: 1px;
+            text-shadow: 0 0 15px rgba(0, 243, 255, 0.3);
+        }
+
+        .app-subtitle {
+            font-size: 10px;
+            color: #a0a0ff;
+            margin-top: 2px;
+            letter-spacing: 1.5px;
+            font-weight: 500;
+        }
+
+        .header-buttons {
+            display: flex;
+            gap: 8px;
+        }
+
+        .icon-button {
+            background: rgba(26, 31, 53, 0.8);
+            border: 1px solid rgba(0, 243, 255, 0.3);
+            color: var(--neon-cyan);
+            width: 35px;
+            height: 35px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .main-display {
+            width: 100%;
+            background: rgba(21, 26, 45, 0.7);
+            border-radius: 15px;
+            padding: 15px;
+            margin-bottom: 15px;
+            border: 1px solid rgba(0, 243, 255, 0.2);
+            box-shadow: 
+                0 10px 30px rgba(0, 0, 0, 0.4),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+        }
+
+        .main-display::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: linear-gradient(90deg, var(--neon-cyan), var(--neon-purple));
+        }
+
+        .current-session {
+            font-size: 12px;
+            color: #a0a0ff;
+            margin-bottom: 10px;
+            letter-spacing: 1.5px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .main-result {
+            font-size: 50px;
+            font-weight: 900;
+            margin: 5px 0;
+            color: white;
+            text-shadow: 
+                0 0 20px var(--neon-cyan),
+                0 0 40px rgba(0, 243, 255, 0.5);
+            letter-spacing: 5px;
+            position: relative;
+            padding: 5px;
+            font-family: 'Orbitron', monospace;
+            height: 70px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .result-glow {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 120px;
+            height: 120px;
+            background: radial-gradient(circle, rgba(0, 243, 255, 0.2) 0%, transparent 70%);
+            z-index: -1;
+            border-radius: 50%;
+            filter: blur(20px);
+        }
+
+        .update-time {
+            font-size: 12px;
+            color: #a0a0ff;
+            margin-top: 10px;
+            padding: 8px 15px;
+            background: rgba(0, 195, 255, 0.05);
+            border-radius: 12px;
+            display: inline-block;
+            border: 1px solid rgba(0, 243, 255, 0.1);
+            letter-spacing: 0.5px;
+            font-weight: 500;
+            backdrop-filter: blur(5px);
+        }
+
+        .sessions-container {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            width: 100%;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .session-card {
+            background: rgba(21, 26, 45, 0.7);
+            border-radius: 15px;
+            padding: 15px;
+            width: 100%;
+            border: 1px solid rgba(0, 243, 255, 0.15);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+            flex: 1;
+        }
+
+        .session-card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(0, 243, 255, 0.03) 0%, transparent 50%);
+            z-index: -1;
+        }
+
+        .session-header {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 10px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid rgba(0, 243, 255, 0.1);
+        }
+
+        .session-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--neon-cyan);
+            letter-spacing: 1px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .session-icon {
+            font-size: 14px;
+        }
+
+        .session-result {
+            font-size: 40px;
+            font-weight: 900;
+            margin: 8px 0;
+            color: white;
+            text-shadow: 0 0 15px var(--neon-purple);
+            letter-spacing: 3px;
+            font-family: 'Orbitron', monospace;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .market-data {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid rgba(0, 243, 255, 0.1);
+        }
+
+        .data-item {
+            text-align: center;
+            flex: 1;
+            padding: 0 5px;
+        }
+
+        .data-label {
+            font-size: 10px;
+            color: #a0a0ff;
+            margin-bottom: 5px;
+            font-weight: 600;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .data-value {
+            font-size: 18px;
+            font-weight: 800;
+            color: white;
+            padding: 6px 10px;
+            border-radius: 8px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(0, 243, 255, 0.1);
+            font-family: 'Orbitron', monospace;
+        }
+
+        .history-page {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            background: var(--dark-space);
+            color: white;
+            z-index: 1000;
+            overflow-y: auto;
+            padding: 15px;
+            display: none;
+            background-image: 
+                radial-gradient(circle at 20% 30%, rgba(11, 20, 50, 0.9) 0%, transparent 50%),
+                radial-gradient(circle at 80% 70%, rgba(70, 0, 100, 0.7) 0%, transparent 50%);
+        }
+
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(0, 243, 255, 0.2);
+        }
+
+        .history-header h2 {
+            font-size: 20px;
+            background: linear-gradient(90deg, var(--neon-cyan), var(--neon-purple));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            letter-spacing: 1px;
+        }
+
+        .back-button {
+            background: rgba(26, 31, 53, 0.8);
+            color: var(--neon-cyan);
+            border: 1px solid rgba(0, 243, 255, 0.3);
+            padding: 8px 15px;
+            cursor: pointer;
+            border-radius: 10px;
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .history-table-container {
+            width: 100%;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid rgba(0, 243, 255, 0.2);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+            margin-bottom: 15px;
+        }
+
+        .history-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12px;
+        }
+
+        .history-table thead {
+            background: linear-gradient(90deg, rgba(0, 243, 255, 0.2), rgba(185, 103, 255, 0.2));
+        }
+
+        .history-table th {
+            padding: 12px 8px;
+            text-align: center;
+            font-weight: 700;
+            color: white;
+            letter-spacing: 0.5px;
+            border-bottom: 1px solid rgba(0, 243, 255, 0.2);
+        }
+
+        .history-table td {
+            padding: 10px 8px;
+            text-align: center;
+            border-bottom: 1px solid rgba(0, 243, 255, 0.1);
+        }
+
+        .history-table tbody tr {
+            background: rgba(21, 26, 45, 0.7);
+        }
+
+        .history-table tbody tr:nth-child(even) {
+            background: rgba(26, 31, 53, 0.7);
+        }
+
+        .history-table tbody tr:hover {
+            background: rgba(0, 243, 255, 0.1);
+        }
+
+        .history-result {
+            font-size: 16px;
+            font-weight: 800;
+            color: var(--neon-cyan);
+            text-shadow: 0 0 10px rgba(0, 243, 255, 0.5);
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .updated {
+            animation: pulse 0.5s ease;
+        }
+
+        @media (max-width: 480px) {
+            .app-container {
+                padding: 8px;
+                padding-bottom: 10px;
+            }
+            
+            h1 {
+                font-size: 16px;
+            }
+            
+            .main-result {
+                font-size: 40px;
+                letter-spacing: 4px;
+                height: 60px;
+            }
+            
+            .session-result {
+                font-size: 35px;
+                letter-spacing: 2px;
+                height: 50px;
+            }
+            
+            .data-value {
+                font-size: 16px;
+                padding: 5px 8px;
+            }
+            
+            .session-card {
+                padding: 12px 10px;
+            }
+            
+            .history-table {
+                font-size: 11px;
+            }
+            
+            .history-table th, .history-table td {
+                padding: 8px 6px;
+            }
+            
+            .history-header h2 {
+                font-size: 18px;
+            }
+            
+            .result-glow {
+                width: 100px;
+                height: 100px;
+            }
+        }
+
+        @media (max-width: 350px) {
+            .main-result {
+                font-size: 36px;
+                height: 55px;
+            }
+            
+            .session-result {
+                font-size: 32px;
+                height: 45px;
+            }
+            
+            .data-value {
+                font-size: 14px;
+            }
+            
+            .session-title {
+                font-size: 14px;
+            }
+            
+            .icon-button {
+                width: 30px;
+                height: 30px;
+                font-size: 14px;
+            }
+        }
+
+        html, body {
+            overflow-x: hidden;
+            width: 100%;
+            height: 100%;
+        }
+
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.2);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--neon-cyan);
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="grid-bg"></div>
+    <div class="holographic-glow"></div>
+    
+    <div id="mainPage" class="app-container">
+        <div class="header">
+            <div class="app-title">
+                <h1>MYANMAR PLUS 2D</h1>
+                <div class="app-subtitle">MM+</div>
+            </div>
+            <div class="header-buttons">
+                <button class="icon-button" onclick="showHistoryPage()" title="History">📅</button>
+            </div>
+        </div>
+        
+        <div class="main-display">
+            <div class="current-session" id="currentSession">LIVE RESULT</div>
+            <div class="main-result" id="mainResult">--</div>
+            <div class="result-glow"></div>
+            <div class="update-time" id="updateTime">UPDATING...</div>
+        </div>
+        
+        <div class="sessions-container">
+            <div class="session-card">
+                <div class="session-header">
+                    <div class="session-title">
+                        <span class="session-icon">⏰</span> 12:30PM
+                    </div>
+                </div>
+                <div id="dayResult" class="session-result">--</div>
+                <div class="market-data">
+                    <div class="data-item">
+                        <div class="data-label">SET</div>
+                        <div id="daySetValue" class="data-value">--</div>
+                    </div>
+                    <div class="data-item">
+                        <div class="data-label">VALUE</div>
+                        <div id="dayMarketValue" class="data-value">--</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="session-card">
+                <div class="session-header">
+                    <div class="session-title">
+                        <span class="session-icon">⏰</span> 5:01PM
+                    </div>
+                </div>
+                <div id="eveningResult" class="session-result">--</div>
+                <div class="market-data">
+                    <div class="data-item">
+                        <div class="data-label">SET</div>
+                        <div id="eveningSetValue" class="data-value">--</div>
+                    </div>
+                    <div class="data-item">
+                        <div class="data-label">VALUE</div>
+                        <div id="eveningMarketValue" class="data-value">--</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div style="margin-top: 10px; font-size: 10px; color: #666; opacity: 0.7;">
+            Data updates every 5 seconds • System Time: <span id="systemTime">--:--:--</span>
+        </div>
+    </div>
+    
+    <div id="historyPage" class="history-page">
+        <div class="history-header">
+            <h2>📊 RESULT HISTORY</h2>
+            <button class="back-button" onclick="showMainPage()">← BACK</button>
+        </div>
+        <div class="history-table-container">
+            <table class="history-table">
+                <thead>
+                    <tr>
+                        <th>DATE</th>
+                        <th>TIME</th>
+                        <th>SESSION</th>
+                        <th>RESULT</th>
+                        <th>SET</th>
+                        <th>VALUE</th>
+                    </tr>
+                </thead>
+                <tbody id="historyTableBody"></tbody>
+            </table>
+        </div>
+        <div style="margin-top: 15px; font-size: 11px; color: #a0a0ff; opacity: 0.7; text-align: center;">
+            Last 100 records stored • Tap result to copy
+        </div>
+    </div>
+
+    <script>
+        // ===================== FIXED VERSION =====================
+        const APP_ACTIVE_TIME = { hour: 9, minute: 30 };
+        
+        // Session Times
+        const DAY_START = { hour: 12, minute: 0 };
+        const DAY_END = { hour: 14, minute: 0 };
+        const DAY_TREND_TIME = { hour: 12, minute: 29 };
+        const DAY_RESULT_TIME = { hour: 12, minute: 30 };
+        const DAY_FREEZE_START = { hour: 12, minute: 31 };
+        const DAY_FREEZE_END = { hour: 14, minute: 0 };
+        
+        const EVENING_START = { hour: 14, minute: 0 };
+        const EVENING_TREND_TIME = { hour: 17, minute: 0 };
+        const EVENING_RESULT_TIME = { hour: 17, minute: 1 };
+        const EVENING_FREEZE_START = { hour: 17, minute: 2 };
+        const EVENING_FREEZE_END = { hour: 0, minute: 0 };
+        
+        const UPDATE_INTERVAL = 5000;
+        const HISTORY_KEY = "MM2D_FUTURE_HISTORY_v3";
+        
+        // Developer control
+        const FINAL_RESULT_DAY = "12";
+        const FINAL_RESULT_EVENING = "56";
+       // State variables
+        let dayResult = "--";
+        let dayMarketData = { set: "--", value: "--" };
+        let eveningResult = "--";
+        let eveningMarketData = { set: "--", value: "--" };
+        let dayHistorySaved = false;
+        let eveningHistorySaved = false;
+        let dayResultFrozen = false;
+        let eveningResultFrozen = false;
+        
+        // ===================== FIX 1: Better time checking =====================
+        function isInResultMinute(now, targetTime) {
+            // Check if current time is in the exact minute of result
+            return now.getHours() === targetTime.hour && 
+                   now.getMinutes() === targetTime.minute;
+        }
+        
+        function timeToMinutes(time) {
+            return time.hour * 60 + time.minute;
+        }
+        
+        function isInTimeRange(now, start, end) {
+            const nowMinutes = now.getHours() * 60 + now.getMinutes();
+            const startMinutes = timeToMinutes(start);
+            const endMinutes = timeToMinutes(end);
+            
+            if (endMinutes < startMinutes) {
+                return nowMinutes >= startMinutes || nowMinutes < endMinutes;
+            }
+            
+            return nowMinutes >= startMinutes && nowMinutes < endMinutes;
+        }
+        
+        // ===================== FIX 2: Freeze logic implementation =====================
+        function isBetweenTimes(now, start, end) {
+            const nowMinutes = now.getHours() * 60 + now.getMinutes();
+            const startMinutes = timeToMinutes(start);
+            const endMinutes = timeToMinutes(end);
+            
+            if (endMinutes < startMinutes) {
+                return nowMinutes >= startMinutes || nowMinutes <= endMinutes;
+            }
+            
+            return nowMinutes >= startMinutes && nowMinutes <= endMinutes;
+        }
+        
+        function shouldFreezeResult(now) {
+            // Day freeze period
+            if (isBetweenTimes(now, DAY_FREEZE_START, DAY_FREEZE_END)) {
+                return 'DAY';
+            }
+            // Evening freeze period (overnight)
+            if (isBetweenTimes(now, EVENING_FREEZE_START, EVENING_FREEZE_END)) {
+                return 'EVENING';
+            }
+            return false;
+        }
+        
+        // ===================== FIX 3: History save control =====================
+        function resetDailyFlags() {
+            const now = new Date();
+            if (now.getHours() === 0 && now.getMinutes() < 1) {
+                dayHistorySaved = false;
+                eveningHistorySaved = false;
+                dayResultFrozen = false;
+                eveningResultFrozen = false;
+                console.log("Daily flags reset at midnight");
+            }
+        }
+        
+        function saveHistory(result, session, marketData) {
+            const now = new Date();
+            
+            // Don't save empty results or duplicates
+            if (result === "--" || result === "") return;
+            
+            // Check if already saved today for this session
+            if ((session === "12:30PM" && dayHistorySaved) || 
+                (session === "5:01PM" && eveningHistorySaved)) {
+                return;
+            }
+            
+            const history = JSON.parse(localStorage.getItem(HISTORY_KEY)) || [];
+            const dateStr = now.toLocaleDateString();
+            const timeStr = now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+            
+            // Add new entry
+            history.unshift({
+                date: dateStr,
+                time: timeStr,
+                session: session,
+                result: result,
+                set: marketData.set,
+                value: marketData.value
+            });
+            
+            // Keep only last 100 entries
+            if (history.length > 100) {
+                history.pop();
+            }
+            
+            localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
+            
+            // Mark as saved
+            if (session === "12:30PM") {
+                dayHistorySaved = true;
+            } else if (session === "5:01PM") {
+                eveningHistorySaved = true;
+            }
+            
+            console.log(`History saved for ${session}: ${result}`);
+        }
+        
+        // ===================== FIX 4: Proper result control =====================
+        function controlResult(now, normalResult, session) {
+            // Check if already frozen
+            if (session === 'DAY' && dayResultFrozen) {
+                return FINAL_RESULT_DAY;
+            }
+            if (session === 'EVENING' && eveningResultFrozen) {
+                return FINAL_RESULT_EVENING;
+            }
+            
+            // Check for result times
+            if (session === 'DAY' && isInResultMinute(now, DAY_RESULT_TIME)) {
+                dayResultFrozen = true;
+                return FINAL_RESULT_DAY;
+            }
+            
+            if (session === 'EVENING' && isInResultMinute(now, EVENING_RESULT_TIME)) {
+                eveningResultFrozen = true;
+                return FINAL_RESULT_EVENING;
+            }
+            
+            return normalResult;
+        }
+        
+        // ===================== FIX 5: Market data simulation =====================
+        function fakeMarketAPI() {
+            const set = (1000 + Math.random() * 500).toFixed(2);
+            const value = (20000 + Math.random() * 500).toFixed(2);
+            return { 
+                set: Number(set), 
+                value: Number(value), 
+                timestamp: new Date() 
+            };
+        }
+        
+        function calculate2D(set, value) {
+            if (set === 0 && value === 0) return "--";
+            
+            const setDecimalLast = set.toString().split('.')[1]?.slice(-1) || '0';
+            const valueDecimalLast = value.toString().split('.')[1]?.slice(-1) || '0';
+            return `${valueDecimalLast}${setDecimalLast}`;
+        }
+        
+        // ===================== FIX 6: No overlap session management =====================
+        function updateSessions(now) {
+            // Check freeze periods first
+            const freeze = shouldFreezeResult(now);
+            if (freeze) {
+                // In freeze period, keep showing frozen result
+                if (freeze === 'DAY') {
+                    dayResult = FINAL_RESULT_DAY;
+                } else if (freeze === 'EVENING') {
+                    eveningResult = FINAL_RESULT_EVENING;
+                }
+                return;
+            }
+            
+            // Day session (12:00 - 14:00)
+            if (isInTimeRange(now, DAY_START, DAY_END)) {
+                const market = fakeMarketAPI();
+                const rawResult = calculate2D(market.set, market.value);
+                dayResult = controlResult(now, rawResult, 'DAY');
+                dayMarketData = { 
+                    set: market.set.toFixed(2), 
+                    value: market.value.toFixed(2) 
+                };
+                
+                // Save history at result time
+                if (isInResultMinute(now, DAY_RESULT_TIME) && !dayHistorySaved) {
+                    saveHistory(dayResult, "12:30PM", dayMarketData);
+                }
+            }
+            
+            // Evening session (14:00 - 00:00)
+            if (isInTimeRange(now, EVENING_START, EVENING_FREEZE_END)) {
+                const market = fakeMarketAPI();
+                const rawResult = calculate2D(market.set, market.value);
+                eveningResult = controlResult(now, rawResult, 'EVENING');
+                eveningMarketData = { 
+                    set: market.set.toFixed(2), 
+                    value: market.value.toFixed(2) 
+                };
+                
+                // Save history at result time
+                if (isInResultMinute(now, EVENING_RESULT_TIME) && !eveningHistorySaved) {
+                    saveHistory(eveningResult, "5:01PM", eveningMarketData);
+                }
+            }
+        }
+        
+        // ===================== UI Functions =====================
+        function updateDisplay() {
+            const now = new Date();
+            
+            // Reset daily flags at midnight
+            resetDailyFlags();
+            
+            // Update session labels
+            if (isInTimeRange(now, DAY_START, DAY_END)) {
+                document.getElementById('currentSession').textContent = "DAY SESSION LIVE";
+                document.getElementById('mainResult').textContent = dayResult;
+            } else if (isInTimeRange(now, EVENING_START, EVENING_FREEZE_END)) {
+                document.getElementById('currentSession').textContent = "EVENING SESSION LIVE";
+                document.getElementById('mainResult').textContent = eveningResult;
+            } else {
+                document.getElementById('currentSession').textContent = "WAITING FOR SESSION";
+                document.getElementById('mainResult').textContent = "--";
+            }
+            
+            // Update day session
+            document.getElementById('dayResult').textContent = dayResult;
+            document.getElementById('daySetValue').textContent = dayMarketData.set;
+            document.getElementById('dayMarketValue').textContent = dayMarketData.value;
+            
+            // Update evening session
+            document.getElementById('eveningResult').textContent = eveningResult;
+            document.getElementById('eveningSetValue').textContent = eveningMarketData.set;
+            document.getElementById('eveningMarketValue').textContent = eveningMarketData.value;
+            
+            // Update time
+            const updateTime = new Date().toLocaleTimeString([], {
+                hour: '2-digit', 
+                minute: '2-digit', 
+                second: '2-digit'
+            });
+            document.getElementById('updateTime').textContent = `UPDATED: ${updateTime}`;
+            document.getElementById('systemTime').textContent = updateTime;
+            
+            // Add pulse animation on update
+            const mainResult = document.getElementById('mainResult');
+            mainResult.classList.add('updated');
+            setTimeout(() => mainResult.classList.remove('updated'), 500);
+        }
+        
+        function showHistoryPage() {
+            document.getElementById('mainPage').style.display = 'none';
+            document.getElementById('historyPage').style.display = 'block';
+            updateHistoryTable();
+        }
+        
+        function showMainPage() {
+            document.getElementById('mainPage').style.display = 'flex';
+            document.getElementById('historyPage').style.display = 'none';
+        }
+        
+        function updateHistoryTable() {
+            const history = JSON.parse(localStorage.getItem(HISTORY_KEY)) || [];
+            const tableBody = document.getElementById('historyTableBody');
+            
+            if (history.length === 0) {
+                tableBody.innerHTML = '<tr><td colspan="6" style="padding: 40px; color: #a0a0ff;">No history data available yet</td></tr>';
+                return;
+            }
+            
+            let html = '';
+            history.forEach((item, index) => {
+                html += `<tr>
+                    <td>${item.date}</td>
+                    <td>${item.time}</td>
+                    <td>${item.session}</td>
+                    <td><div class="history-result">${item.result}</div></td>
+                    <td>${item.set}</td>
+                    <td>${item.value}</td>
+                </tr>`;
+            });
+            
+            tableBody.innerHTML = html;
+        }
+        
+        // ===================== Initialize App =====================
+        function startApp() {
+            console.log("App started - Fixed Version v3.0");
+            
+            // Initial display
+            updateDisplay();
+            
+            // System time update every second
+            setInterval(() => {
+                const now = new Date();
+                document.getElementById('systemTime').textContent = 
+                    now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', second:'2-digit'});
+            }, 1000);
+            
+            // Main update loop every 5 seconds
+            setInterval(() => {
+                const now = new Date();
+                
+                // Check if app should be active (after 9:30 AM)
+                if (now.getHours() < APP_ACTIVE_TIME.hour || 
+                   (now.getHours() === APP_ACTIVE_TIME.hour && now.getMinutes() < APP_ACTIVE_TIME.minute)) {
+                    // Reset everything before active time
+                    dayResult = "--";
+                    dayMarketData = { set: "--", value: "--" };
+                    eveningResult = "--";
+                    eveningMarketData = { set: "--", value: "--" };
+                    updateDisplay();
+                    return;
+                }
+                
+                // Update sessions based on current time
+                updateSessions(now);
+                
+                // Update display
+                updateDisplay();
+                
+            }, UPDATE_INTERVAL);
+        }
+        
+        // Start the app when page loads
+        document.addEventListener('DOMContentLoaded', startApp);
+        
+        // Prevent zoom on mobile
+        document.addEventListener('touchstart', function(e) {
+            if (e.touches.length > 1) e.preventDefault();
+        }, { passive: false });
+    </script>
+</body>
+</html> 
