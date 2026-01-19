@@ -1,0 +1,1443 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Myanmar 2D Live | Future Vision</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* ===================== CSS RESET & BASE ===================== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+        }
+
+        :root {
+            /* Neon Colors */
+            --neon-cyan: #00f3ff;
+            --neon-purple: #b967ff;
+            --neon-green: #00ff9d;
+            --neon-red: #ff5555;
+            --neon-yellow: #ffcc00;
+            
+            /* Background Colors */
+            --dark-space: #0a0e17;
+            --deep-space: #151a2d;
+            --card-bg: rgba(21, 26, 45, 0.85);
+        }
+
+        body {
+            background-color: var(--dark-space);
+            color: #e0e0ff;
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(11, 20, 50, 0.9) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(70, 0, 100, 0.7) 0%, transparent 40%),
+                linear-gradient(to bottom, var(--dark-space), var(--deep-space));
+        }
+
+        /* ===================== BACKGROUND ===================== */
+        .grid-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(rgba(0, 243, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 243, 255, 0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+            z-index: -1;
+            opacity: 0.4;
+        }
+
+        /* ===================== MAIN APP ===================== */
+        .app-container {
+            max-width: 500px;
+            margin: 0 auto;
+            padding: 15px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(0, 243, 255, 0.1);
+        }
+
+        .app-title h1 {
+            font-size: 18px;
+            font-weight: 900;
+            background: linear-gradient(90deg, var(--neon-cyan), var(--neon-purple));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin: 0;
+            letter-spacing: 1px;
+        }
+
+        .app-subtitle {
+            font-size: 10px;
+            color: var(--neon-cyan);
+            opacity: 0.8;
+            letter-spacing: 1.5px;
+            margin-top: 2px;
+        }
+
+        .icon-button {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            background: rgba(26, 31, 53, 0.8);
+            border: 1px solid rgba(0, 243, 255, 0.3);
+            color: var(--neon-cyan);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .icon-button:hover {
+            background: rgba(0, 243, 255, 0.2);
+            transform: translateY(-2px);
+            box-shadow: 0 0 20px rgba(0, 243, 255, 0.5);
+        }
+
+        /* ===================== MAIN DISPLAY ===================== */
+        .main-display {
+            background: rgba(21, 26, 45, 0.85);
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 15px;
+            border: 1px solid rgba(0, 243, 255, 0.2);
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(15px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+        }
+
+        .main-display::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: linear-gradient(90deg, var(--neon-cyan), var(--neon-purple));
+        }
+
+        .current-session {
+            font-size: 12px;
+            color: var(--neon-cyan);
+            margin-bottom: 10px;
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-weight: 600;
+        }
+
+        .main-result {
+            font-size: 60px;
+            font-weight: 900;
+            margin: 10px 0;
+            color: white;
+            text-shadow: 0 0 30px var(--neon-cyan);
+            letter-spacing: 8px;
+            text-align: center;
+            font-family: 'Orbitron', monospace;
+            height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .update-time {
+            text-align: center;
+            margin-top: 15px;
+            font-size: 12px;
+            color: var(--neon-cyan);
+            padding: 8px 15px;
+            background: rgba(0, 195, 255, 0.05);
+            border-radius: 15px;
+            display: inline-block;
+            border: 1px solid rgba(0, 243, 255, 0.1);
+            margin: 0 auto;
+        }
+
+        /* ===================== SESSIONS ===================== */
+        .sessions-container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .session-card {
+            background: rgba(21, 26, 45, 0.85);
+            border-radius: 15px;
+            padding: 15px;
+            border: 1px solid rgba(0, 243, 255, 0.15);
+            backdrop-filter: blur(10px);
+        }
+
+        .session-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid rgba(0, 243, 255, 0.1);
+        }
+
+        .session-title {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--neon-cyan);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .session-status {
+            font-size: 10px;
+            padding: 4px 8px;
+            border-radius: 20px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .session-result {
+            font-size: 45px;
+            font-weight: 900;
+            margin: 10px 0;
+            color: white;
+            text-shadow: 0 0 20px;
+            letter-spacing: 4px;
+            text-align: center;
+            font-family: 'Orbitron', monospace;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .market-data {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid rgba(0, 243, 255, 0.1);
+        }
+
+        .data-item {
+            text-align: center;
+            flex: 1;
+        }
+
+        .data-label {
+            font-size: 11px;
+            color: #a0a0ff;
+            margin-bottom: 5px;
+            font-weight: 600;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .data-value {
+            font-size: 18px;
+            font-weight: 800;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 10px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(0, 243, 255, 0.1);
+            font-family: 'Orbitron', monospace;
+        }
+
+        /* ===================== CALENDAR PAGE ===================== */
+        .history-page {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            background: var(--dark-space);
+            z-index: 1000;
+            overflow-y: auto;
+            padding: 15px;
+            display: none;
+        }
+
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(0, 243, 255, 0.2);
+        }
+
+        .history-header h2 {
+            font-size: 18px;
+            background: linear-gradient(90deg, var(--neon-cyan), var(--neon-purple));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            letter-spacing: 1px;
+            margin: 0;
+        }
+
+        .back-button {
+            background: rgba(26, 31, 53, 0.8);
+            color: var(--neon-cyan);
+            border: 1px solid rgba(0, 243, 255, 0.3);
+            padding: 8px 15px;
+            cursor: pointer;
+            border-radius: 10px;
+            font-size: 12px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .back-button:hover {
+            background: rgba(0, 243, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .calendar-container {
+            background: rgba(21, 26, 45, 0.85);
+            padding: 15px;
+            border-radius: 15px;
+            border: 1px solid rgba(0, 243, 255, 0.2);
+            margin-bottom: 15px;
+        }
+
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .month-nav {
+            background: rgba(26, 31, 53, 0.8);
+            border: 1px solid rgba(0, 243, 255, 0.3);
+            color: var(--neon-cyan);
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .month-nav:hover {
+            background: rgba(0, 243, 255, 0.2);
+        }
+
+        .month-year {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--neon-cyan);
+            padding: 5px 15px;
+            background: rgba(0, 243, 255, 0.05);
+            border-radius: 10px;
+            border: 1px solid rgba(0, 243, 255, 0.1);
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 4px;
+            text-align: center;
+        }
+
+        .day-header {
+            padding: 6px 2px;
+            font-size: 10px;
+            font-weight: 700;
+            color: var(--neon-cyan);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            background: rgba(26, 31, 53, 0.5);
+            border-radius: 6px;
+            margin-bottom: 4px;
+        }
+
+        .calendar-day {
+            background: rgba(26, 31, 53, 0.6);
+            border-radius: 8px;
+            padding: 8px 2px;
+            min-height: 75px;
+            border: 1px solid rgba(0, 243, 255, 0.1);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .calendar-day:hover {
+            background: rgba(0, 243, 255, 0.1);
+            border-color: var(--neon-cyan);
+        }
+
+        .calendar-day.today {
+            border: 2px solid var(--neon-yellow);
+            background: rgba(255, 204, 0, 0.05);
+        }
+
+        .calendar-day.holiday {
+            background: rgba(255, 85, 85, 0.1);
+            border: 1px solid rgba(255, 85, 85, 0.3);
+        }
+
+        .day-number {
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.7);
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .calendar-day.today .day-number {
+            color: var(--neon-yellow);
+            font-weight: 700;
+        }
+
+        .calendar-day.holiday .day-number {
+            color: var(--neon-red);
+            font-weight: 700;
+        }
+
+        .day-results {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+            width: 100%;
+            align-items: center;
+        }
+
+        .result-am, .result-pm {
+            font-weight: 900;
+            padding: 3px 5px;
+            border-radius: 4px;
+            background: rgba(0, 0, 0, 0.4);
+            font-size: 11px;
+            min-width: 30px;
+            text-align: center;
+            font-family: 'Orbitron', monospace;
+        }
+
+        .result-am {
+            color: var(--neon-green);
+            border: 1px solid rgba(0, 255, 157, 0.3);
+        }
+
+        .result-pm {
+            color: var(--neon-purple);
+            border: 1px solid rgba(185, 103, 255, 0.3);
+        }
+
+        .no-data {
+            color: #a0a0ff;
+            opacity: 0.5;
+            font-size: 10px;
+            margin-top: 8px;
+            font-style: italic;
+        }
+
+        .holiday-label {
+            color: var(--neon-red);
+            font-size: 9px;
+            font-weight: bold;
+            padding: 2px 4px;
+            border-radius: 3px;
+            background: rgba(255, 85, 85, 0.2);
+            margin-top: 5px;
+            text-align: center;
+        }
+
+        .empty-day {
+            background: rgba(26, 31, 53, 0.2);
+            border-radius: 8px;
+            padding: 8px 2px;
+            min-height: 75px;
+            border: 1px solid rgba(0, 243, 255, 0.05);
+            opacity: 0.3;
+        }
+
+        /* ===================== MODAL ===================== */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 2000;
+        }
+
+        .modal-content {
+            background: rgba(21, 26, 45, 0.95);
+            margin: 10% auto;
+            padding: 25px;
+            width: 90%;
+            max-width: 400px;
+            border-radius: 20px;
+            border: 2px solid rgba(0, 243, 255, 0.3);
+            position: relative;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            cursor: pointer;
+            font-size: 24px;
+            color: var(--neon-cyan);
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .close-btn:hover {
+            background: rgba(255, 0, 0, 0.2);
+            transform: rotate(90deg);
+        }
+
+        .modal-header h3 {
+            background: linear-gradient(90deg, var(--neon-cyan), var(--neon-purple));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 20px;
+            font-size: 18px;
+        }
+
+        .session-details {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .detail-card {
+            background: rgba(26, 31, 53, 0.7);
+            border-radius: 15px;
+            padding: 15px;
+            border: 1px solid rgba(0, 243, 255, 0.2);
+        }
+
+        .detail-card h4 {
+            color: var(--neon-cyan);
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+
+        .detail-result {
+            font-size: 32px;
+            font-weight: 900;
+            color: white;
+            margin: 10px 0;
+            font-family: 'Orbitron', monospace;
+            text-align: center;
+        }
+
+        .am-result { color: var(--neon-green); }
+        .pm-result { color: var(--neon-purple); }
+
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(0, 243, 255, 0.1);
+            font-size: 12px;
+        }
+
+        .detail-row:last-child { border-bottom: none; }
+
+        .detail-row .label { color: #a0a0ff; }
+        .detail-row .value {
+            color: white;
+            font-weight: 700;
+            font-family: 'Orbitron', monospace;
+        }
+
+        /* ===================== RESPONSIVE ===================== */
+        @media (max-width: 480px) {
+            .app-container { padding: 10px; }
+            .main-result { font-size: 48px; height: 70px; }
+            .session-result { font-size: 38px; height: 50px; }
+            .data-value { font-size: 16px; padding: 6px 10px; }
+            .calendar-day { min-height: 70px; padding: 6px 1px; }
+            .result-am, .result-pm { font-size: 10px; padding: 2px 4px; }
+            .modal-content { margin: 20% auto; padding: 20px; width: 95%; }
+        }
+
+        /* ===================== ANIMATIONS ===================== */
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .updated { animation: pulse 0.5s ease; }
+    </style>
+</head>
+<body>
+    <div class="grid-bg"></div>
+    
+    <!-- Main App Page -->
+    <div id="mainPage" class="app-container">
+        <div class="header">
+            <div class="app-title">
+                <h1>MYANMAR PLUS 2D</h1>
+                <div class="app-subtitle">AUTO UPDATE SYSTEM</div>
+            </div>
+            <div class="header-buttons">
+                <button class="icon-button" id="historyBtn" title="Calendar">
+                    <i class="fas fa-calendar-alt"></i>
+                </button>
+            </div>
+        </div>
+        
+        <div class="main-display">
+            <div class="current-session" id="currentSession">INITIALIZING...</div>
+            <div class="main-result" id="mainResult">--</div>
+            <div class="update-time">
+                <span id="updateTime">UPDATING...</span>
+            </div>
+        </div>
+        
+        <div class="sessions-container">
+            <!-- Morning Session -->
+            <div class="session-card">
+                <div class="session-header">
+                    <div class="session-title">
+                        <i class="fas fa-sun"></i> MORNING 12:30PM
+                    </div>
+                    <div class="session-status" id="morningStatus">--</div>
+                </div>
+                <div id="dayResult" class="session-result">--</div>
+                <div class="market-data">
+                    <div class="data-item">
+                        <div class="data-label">SET</div>
+                        <div id="daySetValue" class="data-value">--</div>
+                    </div>
+                    <div class="data-item">
+                        <div class="data-label">VALUE</div>
+                        <div id="dayMarketValue" class="data-value">--</div>
+                    </div>
+                </div>
+            </div>
+            <!-- Evening Session -->
+            <div class="session-card">
+                <div class="session-header">
+                    <div class="session-title">
+                        <i class="fas fa-moon"></i> EVENING 5:01PM
+                    </div>
+                    <div class="session-status" id="eveningStatus">--</div>
+                </div>
+                <div id="eveningResult" class="session-result">--</div>
+                <div class="market-data">
+                    <div class="data-item">
+                        <div class="data-label">SET</div>
+                        <div id="eveningSetValue" class="data-value">--</div>
+                    </div>
+                    <div class="data-item">
+                        <div class="data-label">VALUE</div>
+                        <div id="eveningMarketValue" class="data-value">--</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div style="margin-top: 10px; font-size: 10px; color: #a0a0ff; opacity: 0.7; text-align: center;">
+            System Time: <span id="systemTime">--:--:--</span>
+        </div>
+    </div>
+    
+    <!-- History/Calendar Page -->
+    <div id="historyPage" class="history-page" style="display: none;">
+        <div class="history-header">
+            <h2>📅 M+ 2D CALENDAR 2026</h2>
+            <button class="back-button" id="backBtn">
+                <i class="fas fa-arrow-left"></i> BACK
+            </button>
+        </div>
+        
+        <div class="calendar-container">
+            <div class="calendar-header">
+                <button class="month-nav" id="prevMonth">‹</button>
+                <div class="month-year" id="monthYear">January 2026</div>
+                <button class="month-nav" id="nextMonth">›</button>
+            </div>
+            
+            <div class="calendar-grid" id="calendarGrid">
+                <!-- Calendar generated by JavaScript -->
+            </div>
+        </div>
+        
+        <div style="margin-top: 15px; font-size: 10px; color: #a0a0ff; opacity: 0.7; text-align: center;">
+            • Click on any date to view details •
+        </div>
+    </div>
+    
+    <!-- Modal for Day Details -->
+    <div id="resultModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <span class="close-btn" id="closeModalBtn">×</span>
+            <div class="modal-header">
+                <h3 id="selectedDate">Date Details</h3>
+            </div>
+            
+            <div class="session-details">
+                <div class="detail-card">
+                    <h4>📅 Morning Session (12:30 PM)</h4>
+                    <div id="modalDayResult" class="detail-result am-result">--</div>
+                    <div class="detail-row">
+                        <span class="label">Set Value:</span>
+                        <span id="modalDaySet" class="value">--</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="label">Market Value:</span>
+                        <span id="modalDayValue" class="value">--</span>
+                    </div>
+                </div>
+                
+                <div class="detail-card">
+                    <h4>🌙 Evening Session (5:01 PM)</h4>
+                    <div id="modalEveningResult" class="detail-result pm-result">--</div>
+                    <div class="detail-row">
+                        <span class="label">Set Value:</span>
+                        <span id="modalEveningSet" class="value">--</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="label">Market Value:</span>
+                        <span id="modalEveningValue" class="value">--</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        // ===================== GLOBAL VARIABLES =====================
+        const SESSION_TIMES = {
+            MORNING: {
+                start: { hour: 9, minute: 30 },
+                final: { hour: 12, minute: 30 },
+                end: { hour: 14, minute: 0 }
+            },
+            EVENING: {
+                start: { hour: 14, minute: 0 },
+                final: { hour: 17, minute: 1 },
+                end: { hour: 24, minute: 0 }
+            }
+        };
+
+        // Demo data for dates before 19th Jan 2026
+        const DEMO_DATA = {
+            "2026-01-01": { morning: "HOLIDAY", evening: "HOLIDAY", isHoliday: true },
+            "2026-01-02": { morning: "15", evening: "89" },
+            "2026-01-03": { morning: "42", evening: "76" },
+            "2026-01-04": { morning: "HOLIDAY", evening: "HOLIDAY", isHoliday: true },
+            "2026-01-05": { morning: "68", evening: "23" },
+            "2026-01-06": { morning: "91", evening: "37" },
+            "2026-01-07": { morning: "54", evening: "82" },
+            "2026-01-08": { morning: "27", evening: "69" },
+            "2026-01-09": { morning: "83", evening: "14" },
+            "2026-01-10": { morning: "46", evening: "92" },
+            "2026-01-11": { morning: "19", evening: "55" },
+            "2026-01-12": { morning: "72", evening: "38" },
+            "2026-01-13": { morning: "35", evening: "81" },
+            "2026-01-14": { morning: "64", evening: "29" },
+            "2026-01-15": { morning: "97", evening: "43" },
+            "2026-01-16": { morning: "26", evening: "78" },
+            "2026-01-17": { morning: "53", evening: "16" },
+            "2026-01-18": { morning: "88", evening: "62" }
+        };
+
+        // Developer results from 19th Jan 2026
+        const DEVELOPER_RESULTS = {
+            "2026-01-19": { morning: "78", evening: "80" },
+            "2026-01-20": { morning: "45", evening: "67" },
+            "2026-01-21": { morning: "92", evening: "18" },
+            "2026-01-22": { morning: "36", evening: "54" },
+            "2026-01-23": { morning: "71", evening: "29" },
+            "2026-01-24": { morning: "83", evening: "46" },
+            "2026-01-25": { morning: "19", evening: "77" },
+            "2026-01-26": { morning: "62", evening: "95" },
+            "2026-01-27": { morning: "28", evening: "41" },
+            "2026-01-28": { morning: "57", evening: "33" },
+            "2026-01-29": { morning: "84", evening: "66" },
+            "2026-01-30": { morning: "39", evening: "22" },
+            "2026-01-31": { morning: "73", evening: "51" }
+        };
+
+        const HOLIDAYS = [
+            "2026-01-01", "2026-01-04", "2026-02-12", "2026-03-02",
+            "2026-03-27", "2026-04-13", "2026-04-14", "2026-04-15",
+            "2026-04-16", "2026-04-17", "2026-05-01", "2026-07-19",
+            "2026-12-25", "2026-12-31"
+        ];
+
+        let currentMonth = 0; // January
+        let currentYear = 2026;
+
+        // ===================== UTILITY FUNCTIONS =====================
+        function formatDate(date) {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+
+        function formatTime(date) {
+            const hours = String(date.getHours()).padStart(2, '0');
+            const minutes = String(date.getMinutes()).padStart(2, '0');
+            const seconds = String(date.getSeconds()).padStart(2, '0');
+            return `${hours}:${minutes}:${seconds}`;
+        }
+
+        function isHoliday(date) {
+            return HOLIDAYS.includes(formatDate(date));
+        }
+
+        function timeToMinutes(time) {
+            return time.hour * 60 + time.minute;
+        }
+
+        function isBetweenTimes(now, start, end) {
+            const nowMinutes = timeToMinutes(now);
+            const startMinutes = timeToMinutes(start);
+            const endMinutes = timeToMinutes(end);
+            return nowMinutes >= startMinutes && nowMinutes <= endMinutes;
+        }
+
+        // ===================== SESSION LOGIC =====================
+        function getCurrentSession() {
+            const now = new Date();
+            const nowTime = { hour: now.getHours(), minute: now.getMinutes() };
+            const todayStr = formatDate(now);
+            
+            // Check holiday
+            if (isHoliday(now)) {
+                return { status: "HOLIDAY", session: null, message: "Public Holiday" };
+            }
+            
+            // Morning session: 9:30 AM - 2:00 PM
+            if (isBetweenTimes(nowTime, SESSION_TIMES.MORNING.start, SESSION_TIMES.MORNING.end)) {
+                // Before final result (9:30 AM - 12:29 PM)
+                if (isBetweenTimes(nowTime, SESSION_TIMES.MORNING.start, 
+                    { hour: SESSION_TIMES.MORNING.final.hour, minute: SESSION_TIMES.MORNING.final.minute - 1 })) {
+                    return { 
+                        status: "LIVE", 
+                        session: "MORNING", 
+                        message: "Morning Session Live",
+                        isBeforeFinal: true
+                    };
+                }
+                // Final result time (12:30 PM)
+                else if (nowTime.hour === SESSION_TIMES.MORNING.final.hour && 
+                         nowTime.minute === SESSION_TIMES.MORNING.final.minute) {
+                    return { 
+                        status: "FINAL", 
+                        session: "MORNING", 
+                        message: "Morning Final Result",
+                        isFinal: true
+                    };
+                }
+                // After final (12:31 PM - 2:00 PM)
+                else {
+                    return { 
+                        status: "FROZEN", 
+                        session: "MORNING", 
+                        message: "Morning Session Completed"
+                    };
+                }
+            }
+            
+            // Evening session: 2:00 PM - 12:00 AM
+            if (isBetweenTimes(nowTime, SESSION_TIMES.EVENING.start, SESSION_TIMES.EVENING.end) ||
+                (nowTime.hour >= SESSION_TIMES.EVENING.start.hour && nowTime.hour < 24)) {
+                
+                // Before final result (2:00 PM - 5:00 PM)
+                if (isBetweenTimes(nowTime, SESSION_TIMES.EVENING.start, 
+                    { hour: SESSION_TIMES.EVENING.final.hour, minute: SESSION_TIMES.EVENING.final.minute - 1 })) {
+                    return { 
+                        status: "LIVE", 
+                        session: "EVENING", 
+                        message: "Evening Session Live",
+                        isBeforeFinal: true
+                    };
+                }
+                // Final result time (5:01 PM)
+                else if (nowTime.hour === SESSION_TIMES.EVENING.final.hour && 
+                         nowTime.minute === SESSION_TIMES.EVENING.final.minute) {
+                    return { 
+                        status: "FINAL", 
+                        session: "EVENING", 
+                        message: "Evening Final Result",
+                        isFinal: true
+                    };
+                }
+                // After final (5:02 PM - 12:00 AM)
+                else {
+                    return { 
+                        status: "FROZEN", 
+                        session: "EVENING", 
+                        message: "Evening Session Completed"
+                    };
+                }
+            }
+            
+            // Outside session hours
+            return { 
+                status: "WAITING", 
+                session: null, 
+                message: "Waiting for next session"
+            };
+        }
+
+        function generateRandomResult() {
+            return String(Math.floor(Math.random() * 100)).padStart(2, '0');
+        }
+
+        function generateSetValue() {
+            const set = (Math.floor(Math.random() * 500) + 1000).toFixed(2);
+            const value = (Math.floor(Math.random() * 1000) + 20000).toFixed(2);
+            return { set, value };
+        }
+
+function getResultForDate(dateStr, session) {
+    const date = new Date(dateStr);
+    const now = new Date();
+    const todayStr = formatDate(now);
+    
+    // Holiday check
+    if (isHoliday(date)) {
+        return { result: "HOLIDAY", set: "--", value: "--", isHoliday: true };
+    }
+    
+    // Future date
+    if (date > now) {
+        return null;
+    }
+    
+    // Today's date - use real-time logic
+    if (dateStr === todayStr) {
+        const sessionInfo = getCurrentSession();
+        
+        // Check if we should show live data or final result
+        if (session === "MORNING") {
+            // Current time is in morning session timeframe
+            if (sessionInfo.session === "MORNING") {
+                if (sessionInfo.isBeforeFinal) {
+                    // Live random result (9:30 AM - 12:29 PM)
+                    const randomResult = generateRandomResult();
+                    const marketData = generateSetValue();
+                    return {
+                        result: randomResult,
+                        set: marketData.set,
+                        value: marketData.value,
+                        isLive: true
+                    };
+                } else {
+                    // Final result (12:30 PM and after)
+                    const devResult = DEVELOPER_RESULTS[todayStr];
+                    if (devResult && devResult.morning) {
+                        const marketData = generateSetValue();
+                        return {
+                            result: devResult.morning,
+                            set: marketData.set,
+                            value: marketData.value,
+                            isFinal: true
+                        };
+                    }
+                }
+            } 
+            // Morning session already completed (after 12:30 PM)
+            else if (now.getHours() >= 12 && now.getMinutes() >= 30) {
+                const devResult = DEVELOPER_RESULTS[todayStr];
+                if (devResult && devResult.morning) {
+                    const marketData = generateSetValue();
+                    return {
+                        result: devResult.morning,
+                        set: marketData.set,
+                        value: marketData.value,
+                        isFinal: true
+                    };
+                }
+            }
+            // Before morning session (before 9:30 AM)
+            else {
+                return null;
+            }
+        } 
+        else if (session === "EVENING") {
+            // Current time is in evening session timeframe
+            if (sessionInfo.session === "EVENING") {
+                if (sessionInfo.isBeforeFinal) {
+                    // Live random result (2:00 PM - 5:00 PM)
+                    const randomResult = generateRandomResult();
+                    const marketData = generateSetValue();
+                    return {
+                        result: randomResult,
+                        set: marketData.set,
+                        value: marketData.value,
+                        isLive: true
+                    };
+                } else {
+                    // Final result (5:01 PM and after)
+                    const devResult = DEVELOPER_RESULTS[todayStr];
+                    if (devResult && devResult.evening) {
+                        const marketData = generateSetValue();
+                        return {
+                            result: devResult.evening,
+                            set: marketData.set,
+                            value: marketData.value,
+                            isFinal: true
+                        };
+                    }
+                }
+            }
+            // Evening session hasn't started yet (before 2:00 PM)
+            else if (now.getHours() < 14) {
+                return null;
+            }
+            // Evening session already completed (after 5:01 PM)
+            else if (now.getHours() >= 17 || (now.getHours() === 17 && now.getMinutes() >= 1)) {
+                const devResult = DEVELOPER_RESULTS[todayStr];
+                if (devResult && devResult.evening) {
+                    const marketData = generateSetValue();
+                    return {
+                        result: devResult.evening,
+                        set: marketData.set,
+                        value: marketData.value,
+                        isFinal: true
+                    };
+                }
+            }
+        }
+        return null;
+    }
+    
+    // Past dates - use demo or developer data
+    if (dateStr < "2026-01-19") {
+        const demoData = DEMO_DATA[dateStr];
+        if (demoData) {
+            if (demoData.isHoliday) {
+                return { result: "HOLIDAY", set: "--", value: "--", isHoliday: true };
+            }
+            const marketData = generateSetValue();
+            return {
+                result: demoData[session.toLowerCase()],
+                set: marketData.set,
+                value: marketData.value,
+                isPast: true
+            };
+        }
+    } else if (dateStr <= todayStr) {
+        // From 19th Jan 2026 onwards - use developer data
+        const devResult = DEVELOPER_RESULTS[dateStr];
+        if (devResult && devResult[session.toLowerCase()]) {
+            const marketData = generateSetValue();
+            return {
+                result: devResult[session.toLowerCase()],
+                set: marketData.set,
+                value: marketData.value,
+                isDeveloper: true
+            };
+        }
+    }
+    
+    return null;
+}
+        // ===================== DISPLAY FUNCTIONS =====================
+        function updateDisplay() {
+            const now = new Date();
+            const todayStr = formatDate(now);
+            const sessionInfo = getCurrentSession();
+            
+            // Update system time
+            document.getElementById('systemTime').textContent = formatTime(now);
+            document.getElementById('updateTime').textContent = `UPDATED: ${formatTime(now)}`;
+            
+            // Update session status
+            const currentSessionEl = document.getElementById('currentSession');
+            const mainResultEl = document.getElementById('mainResult');
+            
+            currentSessionEl.textContent = sessionInfo.message;
+            
+            if (sessionInfo.status === "HOLIDAY") {
+                mainResultEl.textContent = "--";
+                mainResultEl.style.color = "#ff5555";
+            } else {
+                mainResultEl.style.color = "white";
+            }
+            
+            // Update morning session
+            const morningData = getResultForDate(todayStr, "MORNING");
+            const dayResultEl = document.getElementById('dayResult');
+            const daySetValueEl = document.getElementById('daySetValue');
+            const dayMarketValueEl = document.getElementById('dayMarketValue');
+            const morningStatusEl = document.getElementById('morningStatus');
+            
+            if (morningData) {
+                dayResultEl.textContent = morningData.result;
+                dayResultEl.style.color = morningData.isHoliday ? "#ff5555" : "#00ff9d";
+                daySetValueEl.textContent = morningData.set;
+                dayMarketValueEl.textContent = morningData.value;
+                
+                if (morningData.isHoliday) {
+                    morningStatusEl.textContent = "HOLIDAY";
+                    morningStatusEl.style.background = "rgba(255, 85, 85, 0.1)";
+                    morningStatusEl.style.color = "#ff5555";
+                    morningStatusEl.style.border = "1px solid rgba(255, 85, 85, 0.3)";
+                } else if (sessionInfo.session === "MORNING") {
+                    if (sessionInfo.isBeforeFinal) {
+                        morningStatusEl.textContent = "LIVE";
+                        morningStatusEl.style.background = "rgba(0, 255, 157, 0.1)";
+                        morningStatusEl.style.color = "#00ff9d";
+                        morningStatusEl.style.border = "1px solid rgba(0, 255, 157, 0.3)";
+                    } else {
+                        morningStatusEl.textContent = "FINAL";
+                        morningStatusEl.style.background = "rgba(255, 204, 0, 0.1)";
+                        morningStatusEl.style.color = "#ffcc00";
+                        morningStatusEl.style.border = "1px solid rgba(255, 204, 0, 0.3)";
+                    }
+                } else {
+                    morningStatusEl.textContent = "DONE";
+                    morningStatusEl.style.background = "rgba(100, 100, 150, 0.1)";
+                    morningStatusEl.style.color = "#a0a0ff";
+                    morningStatusEl.style.border = "1px solid rgba(100, 100, 150, 0.3)";
+                }
+                
+                if (sessionInfo.session === "MORNING" && !morningData.isHoliday) {
+                    mainResultEl.textContent = morningData.result;
+                    mainResultEl.classList.add('updated');
+                    setTimeout(() => mainResultEl.classList.remove('updated'), 500);
+                }
+            }
+            
+            // Update evening session
+            const eveningData = getResultForDate(todayStr, "EVENING");
+            const eveningResultEl = document.getElementById('eveningResult');
+            const eveningSetValueEl = document.getElementById('eveningSetValue');
+            const eveningMarketValueEl = document.getElementById('eveningMarketValue');
+            const eveningStatusEl = document.getElementById('eveningStatus');
+            
+            if (eveningData) {
+                eveningResultEl.textContent = eveningData.result;
+                eveningResultEl.style.color = eveningData.isHoliday ? "#ff5555" : "#b967ff";
+                eveningSetValueEl.textContent = eveningData.set;
+                eveningMarketValueEl.textContent = eveningData.value;
+                
+                if (eveningData.isHoliday) {
+                    eveningStatusEl.textContent = "HOLIDAY";
+                    eveningStatusEl.style.background = "rgba(255, 85, 85, 0.1)";
+                    eveningStatusEl.style.color = "#ff5555";
+                    eveningStatusEl.style.border = "1px solid rgba(255, 85, 85, 0.3)";
+                } else if (sessionInfo.session === "EVENING") {
+                    if (sessionInfo.isBeforeFinal) {
+                        eveningStatusEl.textContent = "LIVE";
+                        eveningStatusEl.style.background = "rgba(185, 103, 255, 0.1)";
+                        eveningStatusEl.style.color = "#b967ff";
+                        eveningStatusEl.style.border = "1px solid rgba(185, 103, 255, 0.3)";
+                    } else {
+                        eveningStatusEl.textContent = "FINAL";
+                        eveningStatusEl.style.background = "rgba(255, 204, 0, 0.1)";
+                        eveningStatusEl.style.color = "#ffcc00";
+                        eveningStatusEl.style.border = "1px solid rgba(255, 204, 0, 0.3)";
+                    }
+                } else if (sessionInfo.session === "MORNING") {
+                    eveningStatusEl.textContent = "WAIT";
+                    eveningStatusEl.style.background = "rgba(185, 103, 255, 0.1)";
+                    eveningStatusEl.style.color = "#b967ff";
+                    eveningStatusEl.style.border = "1px solid rgba(185, 103, 255, 0.3)";
+                } else {
+                    eveningStatusEl.textContent = "DONE";
+                    eveningStatusEl.style.background = "rgba(100, 100, 150, 0.1)";
+                    eveningStatusEl.style.color = "#a0a0ff";
+                    eveningStatusEl.style.border = "1px solid rgba(100, 100, 150, 0.3)";
+                }
+                
+                if (sessionInfo.session === "EVENING" && !eveningData.isHoliday) {
+                    mainResultEl.textContent = eveningData.result;
+                    mainResultEl.classList.add('updated');
+                    setTimeout(() => mainResultEl.classList.remove('updated'), 500);
+                }
+            }
+            
+            // If no active session, show the latest result
+            if (!sessionInfo.session || sessionInfo.status === "WAITING") {
+                if (eveningData && !eveningData.isHoliday && eveningData.result !== "--") {
+                    mainResultEl.textContent = eveningData.result;
+                } else if (morningData && !morningData.isHoliday && morningData.result !== "--") {
+                    mainResultEl.textContent = morningData.result;
+                } else {
+                    mainResultEl.textContent = "--";
+                }
+            }
+        }
+
+        // ===================== CALENDAR FUNCTIONS =====================
+        function generateCalendar() {
+            const calendarGrid = document.getElementById('calendarGrid');
+            const monthYearEl = document.getElementById('monthYear');
+            const monthNames = [
+                "January", "February", "March", "April", "May", "June",
+                "July", "August", "September", "October", "November", "December"
+            ];
+            
+            calendarGrid.innerHTML = '';
+            monthYearEl.textContent = `${monthNames[currentMonth]} ${currentYear}`;
+            
+            // Day headers
+            const dayHeaders = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
+            dayHeaders.forEach(day => {
+                const dayHeader = document.createElement('div');
+                dayHeader.className = 'day-header';
+                dayHeader.textContent = day;
+                calendarGrid.appendChild(dayHeader);
+            });
+            
+            // Get first day and total days
+            const firstDay = new Date(currentYear, currentMonth, 1);
+            const lastDay = new Date(currentYear, currentMonth + 1, 0);
+            const totalDays = lastDay.getDate();
+            const startingDay = firstDay.getDay();
+            
+            // Empty days before start
+            for (let i = 0; i < startingDay; i++) {
+                const emptyDay = document.createElement('div');
+                emptyDay.className = 'empty-day';
+                calendarGrid.appendChild(emptyDay);
+            }
+            
+            // Days of month
+            const today = new Date();
+            const todayStr = formatDate(today);
+            
+            for (let day = 1; day <= totalDays; day++) {
+                const date = new Date(currentYear, currentMonth, day);
+                const dateStr = formatDate(date);
+                const isToday = dateStr === todayStr;
+                const isHolidayDate = isHoliday(date);
+                const isFuture = date > today;
+                
+                const morningData = getResultForDate(dateStr, "MORNING");
+                const eveningData = getResultForDate(dateStr, "EVENING");
+                
+                const dayElement = document.createElement('div');
+                dayElement.className = 'calendar-day';
+                
+                if (isToday) dayElement.classList.add('today');
+                if (isHolidayDate) dayElement.classList.add('holiday');
+                
+                // Day number
+                const dayNumber = document.createElement('div');
+                dayNumber.className = 'day-number';
+                dayNumber.textContent = day;
+                dayElement.appendChild(dayNumber);
+                
+                // Results
+                const resultsContainer = document.createElement('div');
+                resultsContainer.className = 'day-results';
+                
+                if (isHolidayDate) {
+                    const holidayLabel = document.createElement('div');
+                    holidayLabel.className = 'holiday-label';
+                    holidayLabel.textContent = 'HOLIDAY';
+                    resultsContainer.appendChild(holidayLabel);
+                } else if (isFuture) {
+                    const futureLabel = document.createElement('div');
+                    futureLabel.className = 'no-data';
+                    futureLabel.textContent = 'FUTURE';
+                    resultsContainer.appendChild(futureLabel);
+                } else {
+                    if (morningData && morningData.result && morningData.result !== "HOLIDAY") {
+                        const amResult = document.createElement('div');
+                        amResult.className = 'result-am';
+                        amResult.textContent = morningData.result;
+                        resultsContainer.appendChild(amResult);
+                    }
+                    
+                    if (eveningData && eveningData.result && eveningData.result !== "HOLIDAY") {
+                        const pmResult = document.createElement('div');
+                        pmResult.className = 'result-pm';
+                        pmResult.textContent = eveningData.result;
+                        resultsContainer.appendChild(pmResult);
+                    }
+                    
+                    if ((!morningData || !morningData.result || morningData.result === "HOLIDAY") && 
+                        (!eveningData || !eveningData.result || eveningData.result === "HOLIDAY")) {
+                        const noData = document.createElement('div');
+                        noData.className = 'no-data';
+                        noData.textContent = 'NO DATA';
+                        resultsContainer.appendChild(noData);
+                    }
+                }
+                
+                dayElement.appendChild(resultsContainer);
+                
+                // Click event
+                dayElement.addEventListener('click', () => {
+                    showDayModal(date, morningData, eveningData, isHolidayDate);
+                });
+                
+                calendarGrid.appendChild(dayElement);
+            }
+            
+            // Empty days after end
+            const totalCells = 42;
+            const currentCells = startingDay + totalDays;
+            for (let i = currentCells; i < totalCells; i++) {
+                const emptyDay = document.createElement('div');
+                emptyDay.className = 'empty-day';
+                calendarGrid.appendChild(emptyDay);
+            }
+        }
+
+        function showDayModal(date, morningData, eveningData, isHolidayDate) {
+            const modal = document.getElementById('resultModal');
+            const selectedDateEl = document.getElementById('selectedDate');
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            
+            selectedDateEl.textContent = date.toLocaleDateString('en-US', options);
+            
+            // Morning
+            const modalDayResultEl = document.getElementById('modalDayResult');
+            const modalDaySetEl = document.getElementById('modalDaySet');
+            const modalDayValueEl = document.getElementById('modalDayValue');
+            
+            if (isHolidayDate) {
+                modalDayResultEl.textContent = "HOLIDAY";
+                modalDayResultEl.style.color = "#ff5555";
+                modalDaySetEl.textContent = "--";
+                modalDayValueEl.textContent = "--";
+            } else if (morningData && morningData.result) {
+                modalDayResultEl.textContent = morningData.result;
+                modalDayResultEl.style.color = "#00ff9d";
+                modalDaySetEl.textContent = morningData.set || "--";
+                modalDayValueEl.textContent = morningData.value || "--";
+            } else {
+                modalDayResultEl.textContent = "--";
+                modalDaySetEl.textContent = "--";
+                modalDayValueEl.textContent = "--";
+            }
+            
+            // Evening
+            const modalEveningResultEl = document.getElementById('modalEveningResult');
+            const modalEveningSetEl = document.getElementById('modalEveningSet');
+            const modalEveningValueEl = document.getElementById('modalEveningValue');
+            
+            if (isHolidayDate) {
+                modalEveningResultEl.textContent = "HOLIDAY";
+                modalEveningResultEl.style.color = "#ff5555";
+                modalEveningSetEl.textContent = "--";
+                modalEveningValueEl.textContent = "--";
+            } else if (eveningData && eveningData.result) {
+                modalEveningResultEl.textContent = eveningData.result;
+                modalEveningResultEl.style.color = "#b967ff";
+                modalEveningSetEl.textContent = eveningData.set || "--";
+                modalEveningValueEl.textContent = eveningData.value || "--";
+            } else {
+                modalEveningResultEl.textContent = "--";
+                modalEveningSetEl.textContent = "--";
+                modalEveningValueEl.textContent = "--";
+            }
+            
+            modal.style.display = 'block';
+        }
+// ===================== PAGE NAVIGATION =====================
+        function showHistoryPage() {
+            document.getElementById('mainPage').style.display = 'none';
+            document.getElementById('historyPage').style.display = 'block';
+            generateCalendar();
+        }
+
+        function showMainPage() {
+            document.getElementById('historyPage').style.display = 'none';
+            document.getElementById('mainPage').style.display = 'flex';
+        }
+
+        // ===================== EVENT LISTENERS =====================
+        function setupEventListeners() {
+            document.getElementById('historyBtn').addEventListener('click', showHistoryPage);
+            document.getElementById('backBtn').addEventListener('click', showMainPage);
+            
+            document.getElementById('prevMonth').addEventListener('click', () => {
+                currentMonth--;
+                if (currentMonth < 0) {
+                    currentMonth = 11;
+                    currentYear--;
+                }
+                generateCalendar();
+            });
+            
+            document.getElementById('nextMonth').addEventListener('click', () => {
+                currentMonth++;
+                if (currentMonth > 11) {
+                    currentMonth = 0;
+                    currentYear++;
+                }
+                generateCalendar();
+            });
+            
+            document.getElementById('closeModalBtn').addEventListener('click', () => {
+                document.getElementById('resultModal').style.display = 'none';
+            });
+            
+            window.addEventListener('click', (event) => {
+                const modal = document.getElementById('resultModal');
+                if (event.target === modal) {
+                    modal.style.display = 'none';
+                }
+            });
+        }
+
+        // ===================== INITIALIZATION =====================
+        function initializeApp() {
+            currentMonth = 0; // January
+            currentYear = 2026;
+            
+            setupEventListeners();
+            updateDisplay();
+            
+            // Auto update every second
+            setInterval(updateDisplay, 5000);
+            
+            console.log('Myanmar 2D App Initialized');
+        }
+
+        // Start app
+        document.addEventListener('DOMContentLoaded', initializeApp);
+    </script>
+</body>
+</html>
