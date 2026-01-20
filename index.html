@@ -1,0 +1,1708 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Myanmar 2D Results</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Myanmar Text', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #1e40af;
+            --accent-color: #3b82f6;
+            --morning-color: #f59e0b;
+            --evening-color: #8b5cf6;
+            --success-color: #10b981;
+            --danger-color: #ef4444;
+            --warning-color: #f59e0b;
+            --dark-color: #1f2937;
+            --light-color: #f8fafc;
+            --border-color: #e2e8f0;
+            --shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            --card-radius: 12px;
+        }
+
+        html, body {
+            height: 100%;
+            overflow: hidden;
+            background-color: #f1f5f9;
+            color: var(--dark-color);
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .app-container {
+            height: 100vh;
+            height: calc(var(--vh, 1vh) * 100);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* Header Styles - Mobile Optimized */
+        header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 16px 12px;
+            box-shadow: var(--shadow);
+            flex-shrink: 0;
+            position: relative;
+            z-index: 10;
+            padding-top: max(16px, env(safe-area-inset-top));
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex: 1;
+            min-width: 0;
+        }
+
+        .logo i {
+            font-size: 20px;
+            flex-shrink: 0;
+        }
+
+        .logo-text {
+            min-width: 0;
+        }
+
+        .logo h1 {
+            font-size: 16px;
+            font-weight: 700;
+            line-height: 1.2;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .logo span {
+            font-size: 10px;
+            opacity: 0.9;
+            display: block;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 6px;
+        }
+
+        .btn {
+            padding: 8px 12px;
+            border-radius: 8px;
+            border: none;
+            font-weight: 600;
+            font-size: 12px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+            touch-action: manipulation;
+            background-color: white;
+            color: var(--primary-color);
+            flex-shrink: 0;
+        }
+
+        .btn:active {
+            transform: scale(0.95);
+            background-color: #f0f9ff;
+        }
+
+        /* Main Content - No Scroll */
+        .main-content {
+            flex: 1;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            padding: 0 12px 12px;
+            position: relative;
+        }
+
+        /* Scrollable Content Area */
+        .scroll-container {
+            flex: 1;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            padding-bottom: 20px;
+            margin-top: 12px;
+        }
+
+        .scroll-container::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .scroll-container::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .scroll-container::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 2px;
+        }
+
+        /* Current Status */
+        .status-card {
+            background-color: white;
+            border-radius: var(--card-radius);
+            padding: 16px;
+            box-shadow: var(--shadow);
+            margin-bottom: 12px;
+        }
+
+        .session-status {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .session-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .session-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background-color: var(--morning-color);
+            flex-shrink: 0;
+            animation: pulse 2s infinite;
+        }
+
+        .session-dot.evening {
+            background-color: var(--evening-color);
+        }
+
+        .session-dot.waiting {
+            background-color: #64748b;
+            animation: none;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+
+        .session-text h2 {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 2px;
+        }
+
+        .session-text p {
+            font-size: 11px;
+            color: #64748b;
+            line-height: 1.3;
+        }
+
+        .system-time {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-weight: 600;
+            font-size: 12px;
+            color: var(--primary-color);
+            background: #f0f9ff;
+            padding: 8px 10px;
+            border-radius: 8px;
+            align-self: flex-start;
+        }
+
+        /* Result Display - Compact Layout */
+        .result-display {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .result-card {
+            background-color: white;
+            border-radius: var(--card-radius);
+            padding: 16px;
+            box-shadow: var(--shadow);
+        }
+
+        .card-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            color: var(--dark-color);
+        }
+
+        .main-result {
+            text-align: center;
+            padding: 16px;
+        }
+
+        .result-number {
+            font-size: 40px;
+            font-weight: 800;
+            color: var(--primary-color);
+            margin: 8px 0;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+            line-height: 1;
+        }
+
+        .result-label {
+            color: #64748b;
+            font-size: 12px;
+            margin-bottom: 6px;
+        }
+
+        #resultTime {
+            font-size: 11px;
+            color: #64748b;
+        }
+
+        /* Session Results - Compact */
+        .session-results {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 16px;
+        }
+
+        .session-result {
+            text-align: center;
+            padding: 14px 10px;
+            border-radius: 8px;
+            background-color: #f8fafc;
+            min-height: 80px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .session-result.morning {
+            border-top: 3px solid var(--morning-color);
+        }
+
+        .session-result.evening {
+            border-top: 3px solid var(--evening-color);
+        }
+
+        .session-name {
+            font-weight: 600;
+            font-size: 12px;
+            margin-bottom: 4px;
+        }
+
+        .session-time {
+            font-size: 10px;
+            color: #64748b;
+            margin-bottom: 8px;
+            line-height: 1.2;
+        }
+
+        .session-number {
+            font-size: 24px;
+            font-weight: 700;
+            line-height: 1;
+        }
+
+        /* Market Data - Compact */
+        .market-data {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 16px;
+        }
+
+        .market-item {
+            text-align: center;
+            padding: 14px 10px;
+            border-radius: 8px;
+            background-color: #f8fafc;
+            min-height: 70px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .market-item div:first-child {
+            font-size: 12px;
+            color: #64748b;
+            margin-bottom: 6px;
+        }
+
+        .market-value {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--success-color);
+            line-height: 1;
+        }
+
+        /* Calendar Styles - Mobile Optimized */
+        .calendar-container {
+            background-color: white;
+            border-radius: var(--card-radius);
+            padding: 16px;
+            box-shadow: var(--shadow);
+            display: none;
+            height: 100%;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .calendar-header {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 12px;
+            flex-shrink: 0;
+        }
+
+        .calendar-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .calendar-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--dark-color);
+            flex: 1;
+            text-align: center;
+        }
+
+        .calendar-nav {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 6px;
+            width: 100%;
+        }
+
+        .calendar-nav .btn {
+            width: 100%;
+            padding: 8px;
+            font-size: 11px;
+        }
+
+        .calendar-scroll-container {
+            flex: 1;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 3px;
+            font-size: 13px;
+            min-height: 300px;
+        }
+
+        .calendar-day-header {
+            text-align: center;
+            padding: 8px 2px;
+            font-weight: 600;
+            font-size: 11px;
+            color: #64748b;
+            border-bottom: 1px solid var(--border-color);
+            background: white;
+            position: sticky;
+            top: 0;
+            z-index: 1;
+        }
+
+        .calendar-day {
+            text-align: center;
+            padding: 6px 1px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+            min-height: 50px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            background: white;
+        }
+
+        .calendar-day:active:not(.empty):not(.future) {
+            background-color: #f0f9ff;
+            transform: scale(0.95);
+        }
+
+        .calendar-day.empty {
+            background-color: transparent;
+            cursor: default;
+            min-height: auto;
+            height: 0;
+            padding: 0;
+            visibility: hidden;
+        }
+
+        .calendar-day.today {
+            background-color: var(--primary-color);
+            color: white;
+            font-weight: 700;
+        }
+
+        .calendar-day.holiday {
+            background-color: #fee2e2;
+            color: var(--danger-color);
+        }
+
+        .calendar-day.has-result {
+            border: 1px solid var(--success-color);
+        }
+
+        .day-number {
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 1px;
+        }
+
+        .day-result {
+            font-size: 10px;
+            font-weight: 600;
+            line-height: 1.1;
+            margin: 1px 0;
+        }
+
+        .day-result.morning {
+            color: var(--morning-color);
+        }
+
+        .calendar-day.today .day-result.morning {
+            color: #ffd54f;
+        }
+
+        .day-result.evening {
+            color: var(--evening-color);
+        }
+
+        .calendar-day.today .day-result.evening {
+            color: #b794f4;
+        }
+
+        /* Modal Styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            padding: 12px;
+            backdrop-filter: blur(4px);
+        }
+
+        .modal-content {
+            background-color: white;
+            border-radius: var(--card-radius);
+            width: 100%;
+            max-width: 320px;
+            max-height: 70vh;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px;
+            background-color: var(--primary-color);
+            color: white;
+            position: sticky;
+            top: 0;
+            z-index: 1;
+        }
+
+        .modal-title {
+            font-size: 14px;
+            font-weight: 700;
+            flex: 1;
+            padding-right: 8px;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: background-color 0.2s;
+            flex-shrink: 0;
+        }
+
+        .modal-close:active {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .modal-body {
+            padding: 16px;
+        }
+
+        .day-details {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .detail-row:last-child {
+            border-bottom: none;
+        }
+
+        .detail-label {
+            font-weight: 600;
+            font-size: 13px;
+            color: #64748b;
+        }
+
+        .detail-value {
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .detail-value.morning {
+            color: var(--morning-color);
+        }
+
+        .detail-value.evening {
+            color: var(--evening-color);
+        }
+
+        .holiday-message {
+            text-align: center;
+            padding: 24px 16px;
+            color: var(--danger-color);
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .holiday-message i {
+            font-size: 36px;
+            margin-bottom: 12px;
+            display: block;
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            color: #64748b;
+            font-size: 10px;
+            padding: 12px;
+            border-top: 1px solid var(--border-color);
+            flex-shrink: 0;
+            background: white;
+        }
+
+        /* Back Button */
+        .back-button {
+            width: 100%;
+            margin-bottom: 10px;
+        }
+
+        /* Loading Spinner */
+        .spinner {
+            display: inline-block;
+            width: 18px;
+            height: 18px;
+            border: 2px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Safe Area Insets */
+        @supports (padding: max(0px)) {
+            header {
+                padding-left: max(12px, env(safe-area-inset-left));
+                padding-right: max(12px, env(safe-area-inset-right));
+            }
+            
+            .main-content {
+                padding-left: max(12px, env(safe-area-inset-left));
+                padding-right: max(12px, env(safe-area-inset-right));
+            }
+            
+            footer {
+                padding-left: max(12px, env(safe-area-inset-left));
+                padding-right: max(12px, env(safe-area-inset-right));
+                padding-bottom: max(12px, env(safe-area-inset-bottom));
+            }
+        }
+
+        /* Landscape Optimization */
+        @media (orientation: landscape) {
+            .app-container {
+                flex-direction: row;
+            }
+            
+            header {
+                width: 180px;
+                height: 100%;
+                padding: 12px;
+                flex-direction: column;
+            }
+            
+            .header-content {
+                flex-direction: column;
+                height: 100%;
+            }
+            
+            .logo {
+                flex-direction: column;
+                text-align: center;
+                gap: 8px;
+            }
+            
+            .main-content {
+                flex: 1;
+                padding: 12px;
+            }
+            
+            .result-display {
+                grid-template-columns: 1fr 1fr;
+            }
+            
+            .calendar-container {
+                flex-direction: row;
+            }
+            
+            .calendar-scroll-container {
+                flex: 1;
+            }
+        }
+
+        /* Small Phones */
+        @media (max-height: 600px) {
+            .session-result, .market-item {
+                min-height: 70px;
+                padding: 10px 8px;
+            }
+            
+            .session-number {
+                font-size: 20px;
+            }
+            
+            .market-value {
+                font-size: 18px;
+            }
+            
+            .result-number {
+                font-size: 36px;
+            }
+            
+            .calendar-day {
+                min-height: 45px;
+                padding: 4px 1px;
+            }
+        }
+
+        /* Prevent text selection */
+        .btn, .calendar-day, .modal-close {
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        /* Smooth transitions */
+        .result-number, .session-number, .market-value {
+            transition: all 0.3s ease;
+        }
+
+        /* Reduced motion */
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header>
+            <div class="header-content">
+                <div class="logo">
+                    <i class="fas fa-chart-line"></i>
+                    <div class="logo-text">
+                        <h1>2D Results</h1>
+                        <span>Myanmar 2D Lottery</span>
+                    </div>
+                </div>
+                <div class="nav-buttons">
+                    <button id="historyBtn" class="btn">
+                        <i class="fas fa-calendar-alt"></i>
+                        <span>History</span>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <div class="scroll-container" id="mainScroll">
+                <!-- Current Status -->
+                <div class="status-card">
+                    <div class="session-status">
+                        <div class="session-info">
+                            <div class="session-dot" id="sessionDot"></div>
+                            <div class="session-text">
+                                <h2 id="sessionTitle">Morning Session Live</h2>
+                                <p id="sessionStatus">Live updates every 5 seconds</p>
+                            </div>
+                        </div>
+                        <div class="system-time">
+                            <i class="fas fa-clock"></i>
+                            <span id="currentTime">Loading...</span>
+                        </div>
+                    </div>
+                    
+                    <div class="result-display">
+                        <!-- Main Result -->
+                        <div class="result-card main-result">
+                            <div class="card-title">
+                                <i class="fas fa-trophy"></i>
+                                <span>Current Result</span>
+                            </div>
+                            <div class="result-label" id="mainResultLabel">Morning Session Result</div>
+                            <div class="result-number" id="mainResult">--</div>
+                            <div id="resultTime">Updated at: --:--</div>
+                        </div>
+                        
+                        <!-- Session Results & Market Data -->
+                        <div class="result-card">
+                            <div class="card-title">
+                                <i class="fas fa-list-ol"></i>
+                                <span>Today's Results</span>
+                            </div>
+                            <div class="session-results">
+                                <div class="session-result morning">
+                                    <div class="session-name">Morning</div>
+                                    <div class="session-time">9:30AM-2PM</div>
+                                    <div class="session-number" id="morningResult">--</div>
+                                </div>
+                                <div class="session-result evening">
+                                    <div class="session-name">Evening</div>
+                                    <div class="session-time">2PM-12AM</div>
+                                    <div class="session-number" id="eveningResult">--</div>
+                                </div>
+                            </div>
+                            
+                            <div class="card-title" style="margin-top: 16px;">
+                                <i class="fas fa-chart-bar"></i>
+                                <span>Market Data</span>
+                            </div>
+                            <div class="market-data">
+                                <div class="market-item">
+                                    <div>Set Value</div>
+                                    <div class="market-value" id="setValue">--</div>
+                                </div>
+                                <div class="market-item">
+                                    <div>Market Value</div>
+                                    <div class="market-value" id="marketValue">--</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Calendar -->
+                <div class="calendar-container" id="calendarContainer">
+                    <button id="backButton" class="btn back-button">
+                        <i class="fas fa-arrow-left"></i>
+                        <span>Back to Results</span>
+                    </button>
+                    
+                    <div class="calendar-header">
+                        <div class="calendar-top">
+                            <div class="calendar-title" id="calendarTitle">Jan 2026</div>
+                        </div>
+                        <div class="calendar-nav">
+                            <button id="prevMonth" class="btn">
+                                <i class="fas fa-chevron-left"></i>
+                                <span>Prev</span>
+                            </button>
+                            <button id="todayBtn" class="btn">Today</button>
+                            <button id="nextMonth" class="btn">
+                                <span>Next</span>
+                                <i class="fas fa-chevron-right"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="calendar-scroll-container">
+                        <div class="calendar-grid" id="calendarGrid">
+                            <!-- Calendar will be populated by JavaScript -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <footer>
+                <p>Myanmar 2D Results &copy; 2026 | Auto-save to browser</p>
+            </footer>
+        </div>
+        
+        <!-- Modal for Day Details -->
+        <div class="modal-overlay" id="modalOverlay">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <div class="modal-title" id="modalTitle">Day Details</div>
+                    <button class="modal-close" id="modalClose">&times;</button>
+                </div>
+                <div class="modal-body" id="modalBody">
+                    <!-- Modal content will be populated by JavaScript -->
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        // Fix for mobile viewport height
+        function setVH() {
+            const vh = window.innerHeight * 0.01;
+            document.documentElement.style.setProperty('--vh', `${vh}px`);
+        }
+        
+        setVH();
+        window.addEventListener('resize', setVH);
+        window.addEventListener('orientationchange', setVH);
+
+        // App State
+        let appState = {
+            currentResult: '--',
+            currentSet: 0,
+            currentValue: 0,
+            morningResult: '--',
+            eveningResult: '--',
+            currentSession: 'waiting',
+            sessionStatus: 'waiting'
+        };
+
+        // Calendar State
+        let currentDate = new Date();
+        let calendarYear = currentDate.getFullYear();
+        let calendarMonth = currentDate.getMonth();
+
+        // Random Number Generator for 00-99
+        function getRandom2D() {
+            return Math.floor(Math.random() * 100).toString().padStart(2, '0');
+        }
+
+        // 1. Time Management Functions
+        function timeToMinutes(time) {
+            return time.hour * 60 + time.minute;
+        }
+
+        function isInTimeRange(now, start, end) {
+            const nowMinutes = timeToMinutes(now);
+            const startMinutes = timeToMinutes(start);
+            const endMinutes = timeToMinutes(end);
+            
+            if (endMinutes < startMinutes) {
+                return nowMinutes >= startMinutes || nowMinutes <= endMinutes;
+            }
+            return nowMinutes >= startMinutes && nowMinutes <= endMinutes;
+        }
+
+        function isBetweenTimes(now, start, end) {
+            const nowMinutes = timeToMinutes(now);
+            const startMinutes = timeToMinutes(start);
+            const endMinutes = timeToMinutes(end);
+            
+            return nowMinutes >= startMinutes && nowMinutes <= endMinutes;
+        }
+
+        // 2. 2D Calculation Functions
+        function calculate2D(set, value) {
+            const setStr = set.toString();
+            const valueStr = value.toString();
+            
+            const setDecimal = setStr.includes('.') ? setStr.split('.')[1] : '00';
+            const valueDecimal = valueStr.includes('.') ? valueStr.split('.')[1] : '00';
+            
+            const tail = valueDecimal.length >= 2 ? valueDecimal[valueDecimal.length - 2] : '0';
+            const top = setDecimal.length >= 2 ? setDecimal[setDecimal.length - 1] : '0';
+            
+            return top + tail;
+        }
+
+        function fakeMarketAPI() {
+            const set = (Math.random() * 500 + 1000).toFixed(2);
+            const value = (Math.random() * 1000 + 20000).toFixed(2);
+            
+            return {
+                set: parseFloat(set),
+                value: parseFloat(value)
+            };
+        }
+
+        function generateSetValueFromResult(result) {
+            // Generate random but realistic looking values
+            const baseSet = Math.floor(Math.random() * 500) + 1000;
+            const baseValue = Math.floor(Math.random() * 1000) + 20000;
+            
+            const resultNum = parseInt(result);
+            const setDecimal = (resultNum % 100) / 100;
+            const valueDecimal = (Math.floor(resultNum / 10) % 100) / 100;
+            
+            const set = baseSet + setDecimal;
+            const value = baseValue + valueDecimal;
+            
+            return {
+                set: parseFloat(set.toFixed(2)),
+                value: parseFloat(value.toFixed(2))
+            };
+        }
+
+        // 3. Session Management
+        function updateSessions(now) {
+            const timeStr = `${now.hour.toString().padStart(2, '0')}:${now.minute.toString().padStart(2, '0')}`;
+            
+            if (isHoliday(currentDate)) {
+                updateDisplayForHoliday();
+                return;
+            }
+            
+            const morningLiveStart = {hour: 9, minute: 30};
+            const morningResultTime = {hour: 12, minute: 30};
+            const morningFreezeStart = {hour: 12, minute: 31};
+            const morningSessionEnd = {hour: 14, minute: 0};
+            
+            const eveningLiveStart = {hour: 14, minute: 0};
+            const eveningResultTime = {hour: 17, minute: 1};
+            const eveningFreezeStart = {hour: 17, minute: 2};
+            const eveningSessionEnd = {hour: 0, minute: 0};
+            
+            const newDayResetStart = {hour: 0, minute: 1};
+            const newDayResetEnd = {hour: 9, minute: 29};
+            
+            // Morning session
+            if (isInTimeRange(now, morningLiveStart, morningSessionEnd)) {
+                if (isBetweenTimes(now, morningLiveStart, {hour: 12, minute: 29})) {
+                    appState.currentSession = 'morning';
+                    appState.sessionStatus = 'live';
+                    
+                    const marketData = fakeMarketAPI();
+                    appState.currentSet = marketData.set;
+                    appState.currentValue = marketData.value;
+                    appState.currentResult = calculate2D(marketData.set, marketData.value);
+                    
+                    updateMainDisplay('Morning Session Live', appState.currentResult, timeStr);
+                }
+                else if (isBetweenTimes(now, morningResultTime, morningResultTime)) {
+                    appState.currentSession = 'morning';
+                    appState.sessionStatus = 'result';
+                    
+                    // Generate random final result between 00-99
+                    appState.currentResult = getRandom2D();
+                    const marketData = generateSetValueFromResult(appState.currentResult);
+                    appState.currentSet = marketData.set;
+                    appState.currentValue = marketData.value;
+                    
+                    saveHistory(appState.currentResult, 'Morning', {
+                        set: appState.currentSet,
+                        value: appState.currentValue
+                    });
+                    
+                    appState.morningResult = appState.currentResult;
+                    updateMainDisplay('Morning Final Result', appState.currentResult, timeStr);
+                }
+                else if (isBetweenTimes(now, morningFreezeStart, morningSessionEnd)) {
+                    appState.currentSession = 'morning';
+                    appState.sessionStatus = 'freeze';
+                    updateMainDisplay('Morning Session Closed', appState.morningResult || '--', '12:30');
+                }
+            }
+            // Evening session
+            else if (isInTimeRange(now, eveningLiveStart, eveningSessionEnd)) {
+                if (isBetweenTimes(now, eveningLiveStart, {hour: 17, minute: 0})) {
+                    appState.currentSession = 'evening';
+                    appState.sessionStatus = 'live';
+                    
+                    const marketData = fakeMarketAPI();
+                    appState.currentSet = marketData.set;
+                    appState.currentValue = marketData.value;
+                    appState.currentResult = calculate2D(marketData.set, marketData.value);
+                    
+                    updateMainDisplay('Evening Session Live', appState.currentResult, timeStr);
+                }
+                else if (isBetweenTimes(now, eveningResultTime, eveningResultTime)) {
+                    appState.currentSession = 'evening';
+                    appState.sessionStatus = 'result';
+                    
+                    // Generate random final result between 00-99 (different from morning)
+                    let eveningResult;
+                    do {
+                        eveningResult = getRandom2D();
+                    } while (eveningResult === appState.morningResult);
+                    
+                    appState.currentResult = eveningResult;
+                    const marketData = generateSetValueFromResult(appState.currentResult);
+                    appState.currentSet = marketData.set;
+                    appState.currentValue = marketData.value;
+                    
+                    saveHistory(appState.currentResult, 'Evening', {
+                        set: appState.currentSet,
+                        value: appState.currentValue
+                    });
+                    
+                    appState.eveningResult = appState.currentResult;
+                    updateMainDisplay('Evening Final Result', appState.currentResult, timeStr);
+                }
+                else if (isBetweenTimes(now, eveningFreezeStart, eveningSessionEnd)) {
+                    appState.currentSession = 'evening';
+                    appState.sessionStatus = 'freeze';
+                    updateMainDisplay('Evening Session Closed', appState.eveningResult || '--', '17:01');
+                }
+            }
+            // New day reset
+            else if (isInTimeRange(now, newDayResetStart, newDayResetEnd)) {
+                appState.currentSession = 'waiting';
+                appState.sessionStatus = 'waiting';
+                resetForNewDay();
+                updateMainDisplay('Waiting for Morning Session', '--', '--:--');
+            }
+            
+            updateSessionDisplay();
+        }
+
+        function resetForNewDay() {
+            appState.currentResult = '--';
+            appState.currentSet = 0;
+            appState.currentValue = 0;
+            appState.morningResult = '--';
+            appState.eveningResult = '--';
+            appState.currentSession = 'waiting';
+            appState.sessionStatus = 'waiting';
+            
+            const now = new Date();
+            currentDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        }
+
+        function isHoliday(date) {
+            const holidays2026 = [
+                '2026-01-01', '2026-01-04', '2026-02-12', '2026-03-02',
+                '2026-03-27', '2026-04-13', '2026-04-14', '2026-04-15',
+                '2026-04-16', '2026-04-17', '2026-05-01', '2026-07-19',
+                '2026-12-25', '2026-12-31'
+            ];
+            
+            const dateStr = date.toISOString().split('T')[0];
+            return holidays2026.includes(dateStr);
+        }
+
+        function updateDisplayForHoliday() {
+            appState.currentSession = 'holiday';
+            appState.sessionStatus = 'closed';
+            
+            document.getElementById('sessionTitle').textContent = 'Public Holiday';
+            document.getElementById('sessionStatus').textContent = 'No sessions today';
+            document.getElementById('sessionDot').className = 'session-dot waiting';
+            
+            document.getElementById('mainResultLabel').textContent = 'Holiday - Closed';
+            document.getElementById('mainResult').textContent = '--';
+            document.getElementById('resultTime').textContent = 'No results today';
+            
+            document.getElementById('morningResult').textContent = '--';
+            document.getElementById('eveningResult').textContent = '--';
+            document.getElementById('setValue').textContent = '--';
+            document.getElementById('marketValue').textContent = '--';
+        }
+// 4. Display Functions
+        function updateMainDisplay(label, result, time) {
+            document.getElementById('mainResultLabel').textContent = label;
+            document.getElementById('mainResult').textContent = result;
+            document.getElementById('resultTime').textContent = `Updated at: ${time}`;
+            
+            if (appState.currentSet > 0) {
+                document.getElementById('setValue').textContent = appState.currentSet.toFixed(2);
+            }
+            
+            if (appState.currentValue > 0) {
+                document.getElementById('marketValue').textContent = appState.currentValue.toFixed(2);
+            }
+        }
+
+        function updateSessionDisplay() {
+            const sessionDot = document.getElementById('sessionDot');
+            const sessionTitle = document.getElementById('sessionTitle');
+            const sessionStatus = document.getElementById('sessionStatus');
+            
+            switch(appState.currentSession) {
+                case 'morning':
+                    sessionDot.className = 'session-dot';
+                    
+                    if (appState.sessionStatus === 'live') {
+                        sessionTitle.textContent = 'Morning Session Live';
+                        sessionStatus.textContent = 'Live updates every 5 seconds';
+                    } else if (appState.sessionStatus === 'result') {
+                        sessionTitle.textContent = 'Morning Final Result';
+                        sessionStatus.textContent = 'Result announced at 12:30 PM';
+                    } else {
+                        sessionTitle.textContent = 'Morning Session Closed';
+                        sessionStatus.textContent = 'Next session at 2:00 PM';
+                    }
+                    break;
+                    
+                case 'evening':
+                    sessionDot.className = 'session-dot evening';
+                    
+                    if (appState.sessionStatus === 'live') {
+                        sessionTitle.textContent = 'Evening Session Live';
+                        sessionStatus.textContent = 'Live updates every 5 seconds';
+                    } else if (appState.sessionStatus === 'result') {
+                        sessionTitle.textContent = 'Evening Final Result';
+                        sessionStatus.textContent = 'Result announced at 5:01 PM';
+                    } else {
+                        sessionTitle.textContent = 'Evening Session Closed';
+                        sessionStatus.textContent = 'Next session tomorrow at 9:30 AM';
+                    }
+                    break;
+                    
+                case 'waiting':
+                    sessionDot.className = 'session-dot waiting';
+                    sessionTitle.textContent = 'Waiting for Morning Session';
+                    sessionStatus.textContent = 'Next session starts at 9:30 AM';
+                    break;
+            }
+            
+            if (appState.morningResult !== '--') {
+                document.getElementById('morningResult').textContent = appState.morningResult;
+            }
+            
+            if (appState.eveningResult !== '--') {
+                document.getElementById('eveningResult').textContent = appState.eveningResult;
+            }
+        }
+
+        function updateTimeDisplay() {
+            const now = new Date();
+            const timeString = now.toLocaleTimeString('en-US', { 
+                hour12: true, 
+                hour: '2-digit', 
+                minute: '2-digit'
+            });
+            
+            document.getElementById('currentTime').textContent = timeString;
+            
+            const currentTime = {
+                hour: now.getHours(),
+                minute: now.getMinutes(),
+                second: now.getSeconds()
+            };
+            
+            updateSessions(currentTime);
+        }
+
+        // 5. Calendar/History Functions
+        function saveHistory(result, session, marketData) {
+            const history = getHistory();
+            const now = new Date();
+            const dateStr = now.toISOString().split('T')[0];
+            const timeStr = now.toLocaleTimeString('en-US', { 
+                hour12: true, 
+                hour: '2-digit', 
+                minute: '2-digit'
+            });
+            
+            const duplicateIndex = history.findIndex(entry => 
+                entry.date === dateStr && entry.session === session
+            );
+            
+            const newEntry = {
+                date: dateStr,
+                time: timeStr,
+                session: session,
+                result: result,
+                set: marketData.set.toFixed(2),
+                value: marketData.value.toFixed(2)
+            };
+            
+            if (duplicateIndex !== -1) {
+                history[duplicateIndex] = newEntry;
+            } else {
+                history.push(newEntry);
+            }
+            
+            localStorage.setItem('2dHistory', JSON.stringify(history));
+        }
+
+        function getHistory() {
+            const historyJSON = localStorage.getItem('2dHistory');
+            return historyJSON ? JSON.parse(historyJSON) : [];
+        }
+
+        function generateDemoDataForDate(date) {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            
+            if (date > today) return null;
+            
+            if (isHoliday(date)) {
+                return { isHoliday: true };
+            }
+            
+            // Generate random but consistent results based on date
+            const dateStr = date.toISOString().split('T')[0];
+            const seed = dateStr.split('-').join('');
+            
+            // Use date as seed for random but consistent results
+            const random1 = (parseInt(seed.substring(0, 4)) + date.getDate()) % 100;
+            const random2 = (parseInt(seed.substring(4, 8)) + date.getMonth()) % 100;
+            
+            // Ensure results are different
+            let morningResult = random1.toString().padStart(2, '0');
+            let eveningResult = random2.toString().padStart(2, '0');
+            
+            // Make sure they're different
+            if (morningResult === eveningResult) {
+                eveningResult = ((parseInt(eveningResult) + 1) % 100).toString().padStart(2, '0');
+            }
+            
+            return {
+                morning: morningResult,
+                evening: eveningResult,
+                setMorning: (1000 + (random1 % 500)).toFixed(2),
+                valueMorning: (20000 + (random1 % 1000)).toFixed(2),
+                setEvening: (1000 + (random2 % 500)).toFixed(2),
+                valueEvening: (20000 + (random2 % 1000)).toFixed(2)
+            };
+        }
+
+        function getDataForDate(date) {
+            const dateStr = date.toISOString().split('T')[0];
+            
+            // Check localStorage history
+            const history = getHistory();
+            const historyEntries = history.filter(entry => entry.date === dateStr);
+            
+            if (historyEntries.length > 0) {
+                const morningEntry = historyEntries.find(entry => entry.session === 'Morning');
+                const eveningEntry = historyEntries.find(entry => entry.session === 'Evening');
+                
+                return {
+                    hasData: true,
+                    morning: morningEntry ? morningEntry.result : '--',
+                    evening: eveningEntry ? eveningEntry.result : '--',
+                    setMorning: morningEntry ? morningEntry.set : '--',
+                    valueMorning: morningEntry ? morningEntry.value : '--',
+                    setEvening: eveningEntry ? eveningEntry.set : '--',
+                    valueEvening: eveningEntry ? eveningEntry.value : '--'
+                };
+            }
+            
+            // Generate demo data for past dates
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            
+            if (date < today) {
+                const demoData = generateDemoDataForDate(date);
+                if (demoData && demoData.isHoliday) {
+                    return { isHoliday: true };
+                } else if (demoData) {
+                    return {
+                        hasData: true,
+                        ...demoData
+                    };
+                }
+            }
+            
+            // Check if holiday
+            if (isHoliday(date)) {
+                return { isHoliday: true };
+            }
+            
+            // Return null for future dates
+            return null;
+        }
+
+        function generateCalendar() {
+            const calendarGrid = document.getElementById('calendarGrid');
+            calendarGrid.innerHTML = '';
+            
+            // Add day headers
+            const dayHeaders = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
+            dayHeaders.forEach(day => {
+                const dayHeader = document.createElement('div');
+                dayHeader.className = 'calendar-day-header';
+                dayHeader.textContent = day;
+                calendarGrid.appendChild(dayHeader);
+            });
+            
+            // Calculate calendar dates
+            const firstDay = new Date(calendarYear, calendarMonth, 1);
+            const lastDay = new Date(calendarYear, calendarMonth + 1, 0);
+            const totalDays = lastDay.getDate();
+            const firstDayIndex = firstDay.getDay();
+            
+            // Add empty cells for days before first day of month
+            for (let i = 0; i < firstDayIndex; i++) {
+                const emptyDay = document.createElement('div');
+                emptyDay.className = 'calendar-day empty';
+                calendarGrid.appendChild(emptyDay);
+            }
+            
+            // Add days of the month
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            
+            for (let day = 1; day <= totalDays; day++) {
+                const date = new Date(calendarYear, calendarMonth, day);
+                const dayElement = document.createElement('div');
+                dayElement.className = 'calendar-day';
+                
+                // Check if today
+                if (date.getTime() === today.getTime()) {
+                    dayElement.classList.add('today');
+                }
+                
+                // Check if future date
+                if (date > today) {
+                    dayElement.classList.add('future');
+                }
+                
+                // Get data for this date
+                const data = getDataForDate(date);
+                
+                // Check if holiday
+                if (data && data.isHoliday) {
+                    dayElement.classList.add('holiday');
+                }
+                // Check if has results
+                else if (data && data.hasData) {
+                    dayElement.classList.add('has-result');
+                }
+                
+                // Add day number
+                const dayNumber = document.createElement('div');
+                dayNumber.className = 'day-number';
+                dayNumber.textContent = day;
+                dayElement.appendChild(dayNumber);
+                
+                // Add results if available
+                if (data && data.hasData) {
+                    const morningResult = document.createElement('div');
+                    morningResult.className = 'day-result morning';
+                    morningResult.textContent = data.morning;
+                    dayElement.appendChild(morningResult);
+                    
+                    const eveningResult = document.createElement('div');
+                    eveningResult.className = 'day-result evening';
+                    eveningResult.textContent = data.evening;
+                    dayElement.appendChild(eveningResult);
+                } else if (data && data.isHoliday) {
+                    const holidayText = document.createElement('div');
+                    holidayText.className = 'day-result';
+                    holidayText.textContent = 'Holiday';
+                    holidayText.style.color = 'var(--danger-color)';
+                    holidayText.style.fontSize = '9px';
+                    dayElement.appendChild(holidayText);
+                }
+                
+                // Add click event
+                dayElement.addEventListener('click', () => {
+                    if (!dayElement.classList.contains('empty') && !dayElement.classList.contains('future')) {
+                        showDayResults(date, data);
+                    }
+                });
+                
+                calendarGrid.appendChild(dayElement);
+            }
+            
+            // Add minimum height to ensure proper display
+            const totalCells = 42; // 6 weeks * 7 days
+            const addedCells = firstDayIndex + totalDays;
+            if (addedCells < 35) { // Less than 5 weeks
+                const neededCells = 35 - addedCells;
+                for (let i = 0; i < neededCells; i++) {
+                    const emptyDay = document.createElement('div');
+                    emptyDay.className = 'calendar-day empty';
+                    calendarGrid.appendChild(emptyDay);
+                }
+            }
+            
+            // Update calendar title
+            const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+                'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+            document.getElementById('calendarTitle').textContent = 
+                `${monthNames[calendarMonth]} ${calendarYear}`;
+        }
+
+        // 6. Page Navigation
+        function showHistoryPage() {
+            document.querySelector('.status-card').style.display = 'none';
+            document.getElementById('calendarContainer').style.display = 'flex';
+            generateCalendar();
+            // Scroll to top of calendar
+            document.getElementById('mainScroll').scrollTop = 0;
+        }
+
+        function showMainPage() {
+            document.querySelector('.status-card').style.display = 'block';
+            document.getElementById('calendarContainer').style.display = 'none';
+                      // Scroll to top
+            document.getElementById('mainScroll').scrollTop = 0;
+        }
+
+        function showDayResults(date, data) {
+            const modalTitle = document.getElementById('modalTitle');
+            const modalBody = document.getElementById('modalBody');
+            const modalOverlay = document.getElementById('modalOverlay');
+            
+            const dateStr = date.toLocaleDateString('en-US', { 
+                weekday: 'short', 
+                year: 'numeric', 
+                month: 'short', 
+                day: 'numeric' 
+            });
+            
+            modalTitle.textContent = dateStr;
+            
+            if (data && data.isHoliday) {
+                modalBody.innerHTML = `
+                    <div class="holiday-message">
+                        <i class="fas fa-umbrella-beach"></i>
+                        <p>Public Holiday</p>
+                        <p>No 2D sessions today</p>
+                    </div>
+                `;
+            } else if (data && data.hasData) {
+                modalBody.innerHTML = `
+                    <div class="day-details">
+                        <div class="detail-row">
+                            <div class="detail-label">Morning Result:</div>
+                            <div class="detail-value morning">${data.morning}</div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Set Value:</div>
+                            <div class="detail-value">${data.setMorning}</div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Market Value:</div>
+                            <div class="detail-value">${data.valueMorning}</div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Evening Result:</div>
+                            <div class="detail-value evening">${data.evening}</div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Set Value:</div>
+                            <div class="detail-value">${data.setEvening}</div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Market Value:</div>
+                            <div class="detail-value">${data.valueEvening}</div>
+                        </div>
+                    </div>
+                `;
+            } else {
+                modalBody.innerHTML = `
+                    <div class="day-details">
+                        <div class="detail-row">
+                            <div class="detail-label">Morning Result:</div>
+                            <div class="detail-value">--</div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Evening Result:</div>
+                            <div class="detail-value">--</div>
+                        </div>
+                        <div style="text-align: center; margin-top: 16px; color: #64748b; font-size: 13px;">
+                            No data available for this date
+                        </div>
+                    </div>
+                `;
+            }
+            
+            modalOverlay.style.display = 'flex';
+        }
+
+        // 7. Event Listeners
+        function setupEventListeners() {
+            // History button
+            document.getElementById('historyBtn').addEventListener('click', showHistoryPage);
+            
+            // Back button
+            document.getElementById('backButton').addEventListener('click', showMainPage);
+            
+            // Month navigation
+            document.getElementById('prevMonth').addEventListener('click', () => {
+                calendarMonth--;
+                if (calendarMonth < 0) {
+                    calendarMonth = 11;
+                    calendarYear--;
+                }
+                generateCalendar();
+            });
+            
+            document.getElementById('nextMonth').addEventListener('click', () => {
+                calendarMonth++;
+                if (calendarMonth > 11) {
+                    calendarMonth = 0;
+                    calendarYear++;
+                }
+                generateCalendar();
+            });
+            
+            document.getElementById('todayBtn').addEventListener('click', () => {
+                const today = new Date();
+                calendarYear = today.getFullYear();
+                calendarMonth = today.getMonth();
+                generateCalendar();
+            });
+            
+            // Modal close
+            document.getElementById('modalClose').addEventListener('click', () => {
+                document.getElementById('modalOverlay').style.display = 'none';
+            });
+            
+            // Modal outside click
+            document.getElementById('modalOverlay').addEventListener('click', (e) => {
+                if (e.target === document.getElementById('modalOverlay')) {
+                    document.getElementById('modalOverlay').style.display = 'none';
+                }
+            });
+        }
+
+        // 8. Developer Tools
+        function addDeveloperTools() {
+            window.clearCalendarData = function() {
+                localStorage.removeItem('2dHistory');
+                console.log('Calendar data cleared');
+                if (document.getElementById('calendarContainer').style.display === 'flex') {
+                    generateCalendar();
+                }
+            };
+            
+            window.addTestData = function(date, morningResult, eveningResult) {
+                const history = getHistory();
+                const dateStr = typeof date === 'string' ? date : date.toISOString().split('T')[0];
+                
+                const filteredHistory = history.filter(entry => entry.date !== dateStr);
+                
+                if (morningResult && morningResult !== '--') {
+                    const morningData = generateSetValueFromResult(morningResult);
+                    filteredHistory.push({
+                        date: dateStr,
+                        time: '12:30 PM',
+                        session: 'Morning',
+                        result: morningResult,
+                        set: morningData.set.toFixed(2),
+                        value: morningData.value.toFixed(2)
+                    });
+                }
+                
+                if (eveningResult && eveningResult !== '--') {
+                    const eveningData = generateSetValueFromResult(eveningResult);
+                    filteredHistory.push({
+                        date: dateStr,
+                        time: '5:01 PM',
+                        session: 'Evening',
+                        result: eveningResult,
+                        set: eveningData.set.toFixed(2),
+                        value: eveningData.value.toFixed(2)
+                    });
+                }
+                
+                localStorage.setItem('2dHistory', JSON.stringify(filteredHistory));
+                console.log(`Test data added for ${dateStr}`);
+                
+                if (document.getElementById('calendarContainer').style.display === 'flex') {
+                    generateCalendar();
+                }
+            };
+            
+            window.developerHelp = function() {
+                console.log('Developer commands:');
+                console.log('1. clearCalendarData() - Clear all history');
+                console.log('2. addTestData("2026-01-15", "45", "67") - Add test data');
+                console.log('3. developerHelp() - Show this message');
+            };
+            
+            console.log('Developer tools loaded. Type developerHelp() for commands.');
+        }
+
+        // 9. Initialization
+        function initializeApp() {
+            // Initialize current date
+            const now = new Date();
+            currentDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+            calendarYear = now.getFullYear();
+            calendarMonth = now.getMonth();
+            
+            // Setup event listeners
+            setupEventListeners();
+            
+            // Initial display update
+            updateTimeDisplay();
+            
+            // Start update interval
+            setInterval(updateTimeDisplay, 5000);
+            
+            // Add developer tools
+            addDeveloperTools();
+            
+            // Prevent pull-to-refresh on mobile
+            document.addEventListener('touchmove', function(e) {
+                if (e.target.closest('.scroll-container') && e.target.closest('.scroll-container').scrollTop === 0) {
+                    e.preventDefault();
+                }
+            }, { passive: false });
+        }
+
+        // Initialize app when page loads
+        document.addEventListener('DOMContentLoaded', initializeApp);
+    </script>
+</body>
+</html>
